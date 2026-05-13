@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Gremio Fútbol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">El Gremio <span class="accent">Fútbol</span></h1>
+      <p class="hero-sub">Liga interna · Jueves cada 15 días</p>
+      <div class="hero-stats" id="hero-stats"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="podiums">
+      <div class="podium-card">
+        <div class="podium-header">
+          <span class="podium-icon">⚽</span>
+          <h2>Goleadores</h2>
+        </div>
+        <ol class="podium-list" id="top-scorers"></ol>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-header">
+          <span class="podium-icon">🛡</span>
+          <h2>Menos goles recibidos</h2>
+        </div>
+        <ol class="podium-list" id="least-conceded"></ol>
+        <p class="podium-foot">Mínimo 2 partidos jugados</p>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-header">
+          <span class="podium-icon">★</span>
+          <h2>Más MVPs</h2>
+        </div>
+        <ol class="podium-list" id="top-mvps"></ol>
+      </div>
+    </section>
+
+    <section class="filter-card">
+      <div class="filter-header">
+        <h2>Stats por jugador</h2>
+        <select id="player-filter" class="player-select"></select>
+      </div>
+      <div class="player-stats" id="player-stats"></div>
+      <div class="player-history" id="player-history"></div>
+    </section>
+
+    <section class="matches-section">
+      <h2 class="section-title">Historial de partidos</h2>
+      <div class="matches-grid" id="matches-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>El Gremio Fútbol · Actualizado por Juan</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

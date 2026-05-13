@@ -1,0 +1,24 @@
+{
+  "players": [
+    "Tincho",
+    "Mati",
+    "Juli",
+    "Juani",
+    "Fede",
+    "Minu",
+    "Mickey",
+    "Gasti",
+    "Juancho",
+    "Luki"
+  ],
+  "matches": [
+    {
+      "date": "2026-04-23",
+      "claros": ["Tincho", "Mati", "Juli", "Juani", "Fede"],
+      "oscuros": ["Minu", "Mickey", "Gasti", "Juancho", "Luki"],
+      "goals": {},
+      "mvp": "Tincho",
+      "notes": "Empate (no recordamos el resultado exacto)"
+    }
+  ]
+}
