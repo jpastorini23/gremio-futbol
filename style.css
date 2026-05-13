@@ -210,6 +210,73 @@ html, body {
   letter-spacing: 1px;
 }
 
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+
+.avatar::before {
+  content: attr(data-initials);
+}
+
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-xs { width: 22px; height: 22px; font-size: 9px; }
+.avatar-sm { width: 34px; height: 34px; font-size: 12px; }
+.avatar-md { width: 44px; height: 44px; font-size: 14px; }
+.avatar-lg { width: 76px; height: 76px; font-size: 24px; border: 2px solid var(--border); }
+
+.player-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.player-hero-info h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.player-hero-info p {
+  color: var(--text-dim);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.roster-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mvp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .guest-tag {
   display: inline-block;
   font-size: 9px;
@@ -492,7 +559,7 @@ html, body {
 .match-mvp {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   padding: 10px 14px;
   background: rgba(255, 200, 87, 0.08);
   border: 1px solid rgba(255, 200, 87, 0.25);

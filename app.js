@@ -4,6 +4,25 @@ async function loadData() {
   return res.json();
 }
 
+function initials(name) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function avatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 45%, 32%)`;
+}
+
+function avatar(name, size = 'sm') {
+  const color = avatarColor(name);
+  const fallback = `onerror="if(this.dataset.tried){this.remove()}else{this.dataset.tried=1;this.src='img/${name}.png'}"`;
+  return `<span class="avatar avatar-${size}" data-initials="${initials(name)}" style="background:${color}"><img src="img/${name}.jpg" alt="" ${fallback}></span>`;
+}
+
 function teamGoals(match, team) {
   return match[team].reduce((sum, p) => sum + (match.goals[p] || 0), 0);
 }
@@ -100,6 +119,7 @@ function renderPodium(id, items, valueLabel) {
   el.innerHTML = items.map((it, i) => `
     <li class="podium-item rank-${i + 1}">
       <span class="podium-rank">${i + 1}</span>
+      ${avatar(it.name, 'sm')}
       <span class="podium-name">${it.name}${it.isGuest ? ' <span class="guest-tag">inv</span>' : ''}</span>
       <span class="podium-value">${it.value}</span>
     </li>
@@ -144,10 +164,26 @@ function renderPlayerFilter(data, stats) {
 }
 
 function renderPlayerView(s) {
+  const heroEl = document.getElementById('player-hero');
   const statsEl = document.getElementById('player-stats');
   const historyEl = document.getElementById('player-history');
 
-  if (!s || s.played === 0) {
+  if (!s) {
+    heroEl.innerHTML = '';
+    statsEl.innerHTML = '';
+    historyEl.innerHTML = '';
+    return;
+  }
+
+  heroEl.innerHTML = `
+    ${avatar(s.name, 'lg')}
+    <div class="player-hero-info">
+      <h3>${s.name}${s.isGuest ? ' <span class="guest-tag">invitado</span>' : ''}</h3>
+      <p>${s.played === 0 ? 'Sin partidos jugados' : `${s.played} ${s.played === 1 ? 'partido jugado' : 'partidos jugados'}`}</p>
+    </div>
+  `;
+
+  if (s.played === 0) {
     statsEl.innerHTML = '<div class="empty" style="grid-column:1/-1">Este jugador todavía no jugó ningún partido.</div>';
     historyEl.innerHTML = '';
     return;
@@ -201,7 +237,7 @@ function renderMatches(data) {
         ${m[team].map(p => {
           const g = m.goals[p] || 0;
           return `<li class="roster-player ${g > 0 ? 'scorer' : ''}">
-            <span>${p}</span>${g > 0 ? `<span class="roster-goals">${g}</span>` : ''}
+            <span class="roster-name">${avatar(p, 'xs')}<span>${p}</span></span>${g > 0 ? `<span class="roster-goals">${g}</span>` : ''}
           </li>`;
         }).join('')}
       </ul>
@@ -232,8 +268,11 @@ function renderMatches(data) {
           </div>
         </div>
         ${m.mvp ? `<div class="match-mvp">
-          <span class="mvp-label">MVP</span>
-          <span class="mvp-name">${m.mvp}</span>
+          ${avatar(m.mvp, 'md')}
+          <div class="mvp-info">
+            <span class="mvp-label">MVP</span>
+            <span class="mvp-name">${m.mvp}</span>
+          </div>
         </div>` : ''}
       </div>
     `;

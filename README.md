@@ -90,6 +90,21 @@ En el bloque `players` de arriba, sumalo a la lista:
 
 ---
 
+## Fotos de los jugadores
+
+Las fotos son **opcionales** — si no hay foto, se muestra un círculo de color con las iniciales del nombre. Para agregar fotos:
+
+1. En el repo en GitHub, clic en `Add file` → `Upload files`
+2. **Importante:** arriba dice "gremio-futbol /". Al lado del nombre del archivo en la barra (o en el nombre del archivo a subir), escribí `img/Tincho.jpg` (la barra `/` crea la carpeta).
+   - O subí el archivo primero y después editá el nombre poniéndole `img/` adelante
+3. El archivo se tiene que llamar **exacto** como el jugador. Si en `players` figura `Tincho`, la foto va como `Tincho.jpg` (respetando mayúsculas/minúsculas).
+4. Formato: **JPG o PNG**, cuadrada (recomendado 200x200 píxeles para que pese poco)
+5. Commit changes
+
+Si subiste mal el nombre o el formato, simplemente reemplazá el archivo con el correcto desde la misma carpeta `img/` del repo.
+
+---
+
 ## Lógica de stats
 
 - **Goles del jugador**: lo que pusiste en `goals`
