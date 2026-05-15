@@ -846,14 +846,26 @@ html, body {
 @media (max-width: 720px) {
   .hero-top {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
   }
   .hero-spotlight {
-    flex-direction: row;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    column-gap: 14px;
+    row-gap: 2px;
+    align-items: center;
     justify-self: center;
+    width: 100%;
+    max-width: 320px;
+    text-align: left;
   }
-  .hero-spotlight .spotlight-text {
+  .hero-spotlight > .avatar {
+    grid-row: 1 / span 3;
+    align-self: center;
+  }
+  .hero-spotlight .spotlight-label,
+  .hero-spotlight .spotlight-name,
+  .hero-spotlight .spotlight-empty {
     text-align: left;
   }
 }
