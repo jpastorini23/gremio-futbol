@@ -47,7 +47,9 @@ function computePlayerStats(data) {
       losses: 0,
       draws: 0,
       mvps: 0,
+      lastMvpDate: '',
       goleadorCount: 0,
+      lastGoleadorDate: '',
       matches: []
     };
   }
@@ -64,8 +66,14 @@ function computePlayerStats(data) {
       else if (outcome === 'loss') stats[p].losses++;
       else stats[p].draws++;
 
-      if (m.mvp === p) stats[p].mvps++;
-      if (m.goleador === p) stats[p].goleadorCount++;
+      if (m.mvp === p) {
+        stats[p].mvps++;
+        if (m.date > stats[p].lastMvpDate) stats[p].lastMvpDate = m.date;
+      }
+      if (m.goleador === p) {
+        stats[p].goleadorCount++;
+        if (m.date > stats[p].lastGoleadorDate) stats[p].lastGoleadorDate = m.date;
+      }
 
       stats[p].matches.push({
         date: m.date,
@@ -97,10 +105,14 @@ function renderHeroStats(data) {
 }
 
 function renderSpotlights(stats) {
-  const arr = Object.values(stats);
+  const arr = Object.values(stats).filter(s => !s.isGuest);
 
-  const topMvp = arr.filter(s => s.mvps > 0).sort((a, b) => b.mvps - a.mvps)[0];
-  const topGoleador = arr.filter(s => s.goleadorCount > 0).sort((a, b) => b.goleadorCount - a.goleadorCount)[0];
+  const topMvp = arr
+    .filter(s => s.mvps > 0)
+    .sort((a, b) => b.mvps - a.mvps || b.lastMvpDate.localeCompare(a.lastMvpDate))[0];
+  const topGoleador = arr
+    .filter(s => s.goleadorCount > 0)
+    .sort((a, b) => b.goleadorCount - a.goleadorCount || b.lastGoleadorDate.localeCompare(a.lastGoleadorDate))[0];
 
   document.getElementById('spotlight-mvp').innerHTML = renderSpotlight('Figura del torneo', topMvp, topMvp ? `${topMvp.mvps} MVP${topMvp.mvps > 1 ? 's' : ''}` : null);
   document.getElementById('spotlight-goleador').innerHTML = renderSpotlight('Goleador del torneo', topGoleador, topGoleador ? `${topGoleador.goleadorCount} partido${topGoleador.goleadorCount > 1 ? 's' : ''}` : null);
