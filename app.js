@@ -20,7 +20,8 @@ function avatarColor(name) {
 function avatar(name, size = 'sm') {
   const color = avatarColor(name);
   const fallback = `onerror="if(this.dataset.tried){this.remove()}else{this.dataset.tried=1;this.src='img/${name}.png'}"`;
-  return `<span class="avatar avatar-${size}" data-initials="${initials(name)}" style="background:${color}"><img src="img/${name}.jpg" alt="" ${fallback}></span>`;
+  const success = `onload="this.parentElement.classList.add('avatar-clickable')"`;
+  return `<span class="avatar avatar-${size}" data-initials="${initials(name)}" data-name="${name}" style="background:${color}"><img src="img/${name}.jpg" alt="" ${fallback} ${success}></span>`;
 }
 
 function formatDate(iso) {
@@ -167,13 +168,18 @@ function renderPodiums(stats) {
     .map(s => ({ name: s.name, value: s.goleadorCount, isGuest: s.isGuest }));
   renderPodium('top-goleadores', goleadores);
 
-  const winrate = arr
+  const pointsPct = arr
     .filter(s => s.played >= 2)
-    .map(s => ({ name: s.name, value: Math.round((s.wins / s.played) * 100), isGuest: s.isGuest, played: s.played }))
+    .map(s => {
+      const points = s.wins * 3 + s.draws;
+      const max = s.played * 3;
+      const pct = max ? Math.round((points / max) * 100) : 0;
+      return { name: s.name, value: pct, isGuest: s.isGuest, played: s.played, points, max };
+    })
     .sort((a, b) => b.value - a.value || b.played - a.played)
     .slice(0, 5)
     .map(s => ({ name: s.name, value: s.value + '%', isGuest: s.isGuest }));
-  renderPodium('top-winrate', winrate);
+  renderPodium('top-winrate', pointsPct);
 }
 
 function renderPlayerFilter(data, stats) {
@@ -214,12 +220,14 @@ function renderPlayerView(s) {
     return;
   }
 
-  const winRate = s.played ? Math.round((s.wins / s.played) * 100) : 0;
+  const points = s.wins * 3 + s.draws;
+  const maxPoints = s.played * 3;
+  const pointsPct = maxPoints ? Math.round((points / maxPoints) * 100) : 0;
 
   statsEl.innerHTML = `
     <div class="stat-tile"><div class="stat-tile-value">${s.played}</div><div class="stat-tile-label">Partidos</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${s.wins}-${s.draws}-${s.losses}</div><div class="stat-tile-label">G - E - P</div></div>
-    <div class="stat-tile"><div class="stat-tile-value">${winRate}%</div><div class="stat-tile-label">Win Rate</div></div>
+    <div class="stat-tile"><div class="stat-tile-value">${pointsPct}%</div><div class="stat-tile-label">% Puntos (${points}/${maxPoints})</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${s.mvps}</div><div class="stat-tile-label">MVPs</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${s.goleadorCount}</div><div class="stat-tile-label">Goleador</div></div>
   `;
@@ -352,6 +360,12 @@ document.addEventListener('click', (e) => {
     const photos = JSON.parse(container.dataset.photos);
     const index = parseInt(e.target.dataset.index, 10);
     openLightbox(photos, index);
+    return;
+  }
+  const av = e.target.closest('.avatar.avatar-clickable');
+  if (av) {
+    const img = av.querySelector('img');
+    if (img && img.src) openLightbox([img.src], 0);
   }
 });
 
