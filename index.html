@@ -12,8 +12,14 @@
 <body>
   <header class="hero">
     <div class="hero-content">
-      <h1 class="hero-title">El Gremio <span class="accent">Fútbol</span></h1>
-      <p class="hero-sub">Liga interna · Jueves cada 15 días</p>
+      <div class="hero-top">
+        <div class="hero-spotlight" id="spotlight-mvp"></div>
+        <div class="hero-title-wrap">
+          <h1 class="hero-title">El Gremio <span class="accent">Fútbol</span></h1>
+          <p class="hero-sub">Liga interna · Jueves cada 15 días</p>
+        </div>
+        <div class="hero-spotlight" id="spotlight-goleador"></div>
+      </div>
       <div class="hero-stats" id="hero-stats"></div>
     </div>
   </header>
@@ -22,27 +28,27 @@
     <section class="podiums">
       <div class="podium-card">
         <div class="podium-header">
-          <span class="podium-icon">⚽</span>
-          <h2>Goleadores</h2>
-        </div>
-        <ol class="podium-list" id="top-scorers"></ol>
-      </div>
-
-      <div class="podium-card">
-        <div class="podium-header">
-          <span class="podium-icon">🛡</span>
-          <h2>Menos goles recibidos</h2>
-        </div>
-        <ol class="podium-list" id="least-conceded"></ol>
-        <p class="podium-foot">Mínimo 2 partidos jugados</p>
-      </div>
-
-      <div class="podium-card">
-        <div class="podium-header">
           <span class="podium-icon">★</span>
           <h2>Más MVPs</h2>
         </div>
         <ol class="podium-list" id="top-mvps"></ol>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-header">
+          <span class="podium-icon">⚽</span>
+          <h2>Más veces goleador</h2>
+        </div>
+        <ol class="podium-list" id="top-goleadores"></ol>
+      </div>
+
+      <div class="podium-card">
+        <div class="podium-header">
+          <span class="podium-icon">🏆</span>
+          <h2>Mejor win rate</h2>
+        </div>
+        <ol class="podium-list" id="top-winrate"></ol>
+        <p class="podium-foot">Mínimo 2 partidos jugados</p>
       </div>
     </section>
 
@@ -65,6 +71,14 @@
   <footer class="site-footer">
     <p>El Gremio Fútbol · Actualizado por Juan</p>
   </footer>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar">×</button>
+    <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Anterior">‹</button>
+    <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Siguiente">›</button>
+    <img class="lightbox-img" id="lightbox-img" alt="">
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
 
   <script src="app.js"></script>
 </body>

@@ -16,8 +16,10 @@
       "date": "2026-04-23",
       "claros": ["Tincho", "Mati", "Juli", "Juani", "Fede"],
       "oscuros": ["Minu", "Mickey", "Gasti", "Juancho", "Luki"],
-      "goals": {},
+      "winner": "draw",
+      "goleador": "",
       "mvp": "Tincho",
+      "photos": [],
       "notes": "Empate (no recordamos el resultado exacto)"
     }
   ]
