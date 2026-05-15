@@ -316,7 +316,10 @@ function renderMatches(data) {
     return `
       <div class="match-card">
         <div class="match-head">
-          <span class="match-date">${formatDate(m.date)}</span>
+          <div class="match-meta">
+            <span class="match-date">${formatDate(m.date)}</span>
+            ${m.stadium ? `<span class="match-stadium">📍 ${m.stadium} Stadium</span>` : ''}
+          </div>
           <span class="match-result-badge ${m.winner}">${badgeText}</span>
         </div>
         <div class="match-rosters">

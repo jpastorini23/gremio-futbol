@@ -20,6 +20,7 @@
       "winner": "oscuros",
       "goleador": "Minu",
       "mvp": "Mati",
+      "stadium": "Malaver",
       "photos": [
         "img/matches/2026-05-14/equipo.jpg",
         "img/matches/2026-05-14/cena.jpg",
@@ -34,6 +35,7 @@
       "winner": "draw",
       "goleador": "",
       "mvp": "Tincho",
+      "stadium": "Asturiano",
       "photos": ["img/matches/2026-04-23/cena.jpg"],
       "notes": "Empate (no recordamos el resultado exacto)"
     }
