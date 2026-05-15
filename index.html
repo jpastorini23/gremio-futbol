@@ -3,18 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>El Gremio Fútbol</title>
+  <title>El Gremio Fútbol — Dashboard</title>
+  <meta name="description" content="Liga interna del gremio. Resultados, MVPs y goleadores fecha por fecha.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9A%BD</text></svg>">
+
+  <meta property="og:title" content="El Gremio Fútbol">
+  <meta property="og:description" content="Liga interna del gremio. Resultados, MVPs y goleadores fecha por fecha.">
+  <meta property="og:image" content="https://gremio-futbol.vercel.app/img/matches/2026-05-14/equipo.jpg">
+  <meta property="og:url" content="https://gremio-futbol.vercel.app">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="hero">
+  <header class="hero" id="hero">
+    <div class="hero-bg" id="hero-bg"></div>
     <div class="hero-content">
       <div class="hero-top">
         <div class="hero-spotlight" id="spotlight-mvp"></div>
         <div class="hero-title-wrap">
+          <span class="hero-eyebrow">Temporada 2026</span>
           <h1 class="hero-title">El Gremio <span class="accent">Fútbol</span></h1>
           <p class="hero-sub">Liga interna · Jueves cada 15 días</p>
         </div>
@@ -24,6 +36,14 @@
       <div class="hero-note" id="hero-note"></div>
     </div>
   </header>
+
+  <section class="gallery-section reveal">
+    <div class="gallery-head">
+      <h2 class="section-title">Galería</h2>
+      <span class="gallery-hint">Deslizá ←→</span>
+    </div>
+    <div class="gallery-strip" id="gallery-strip"></div>
+  </section>
 
   <main class="container">
     <section class="podiums">

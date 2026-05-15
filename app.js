@@ -96,13 +96,65 @@ function renderHeroStats(data) {
   const draws = data.matches.filter(m => m.winner === 'draw').length;
   const players = data.players.length;
 
-  document.getElementById('hero-stats').innerHTML = `
-    <div class="hero-stat"><div class="hero-stat-value">${total}</div><div class="hero-stat-label">Partidos</div></div>
-    <div class="hero-stat"><div class="hero-stat-value">${clarosWins}</div><div class="hero-stat-label">Wins Claros</div></div>
-    <div class="hero-stat"><div class="hero-stat-value">${oscurosWins}</div><div class="hero-stat-label">Wins Oscuros</div></div>
-    <div class="hero-stat"><div class="hero-stat-value">${draws}</div><div class="hero-stat-label">Empates</div></div>
-    <div class="hero-stat"><div class="hero-stat-value">${players}</div><div class="hero-stat-label">Jugadores</div></div>
-  `;
+  const stats = [
+    { value: total, label: 'Partidos' },
+    { value: clarosWins, label: 'Wins Claros' },
+    { value: oscurosWins, label: 'Wins Oscuros' },
+    { value: draws, label: 'Empates' },
+    { value: players, label: 'Jugadores' },
+  ];
+
+  document.getElementById('hero-stats').innerHTML = stats.map(s => `
+    <div class="hero-stat"><div class="hero-stat-value" data-target="${s.value}">0</div><div class="hero-stat-label">${s.label}</div></div>
+  `).join('');
+
+  document.querySelectorAll('.hero-stat-value').forEach(el => animateNumber(el, +el.dataset.target));
+}
+
+function animateNumber(el, target, duration = 900) {
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(target * eased);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function setHeroBackground(data) {
+  const recent = [...data.matches]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .find(m => Array.isArray(m.photos) && m.photos.length);
+  if (!recent) return;
+  const bg = document.getElementById('hero-bg');
+  bg.style.backgroundImage = `url('${recent.photos[0]}')`;
+  bg.classList.add('hero-bg-visible');
+}
+
+function renderGallery(data) {
+  const strip = document.getElementById('gallery-strip');
+  const all = [];
+  const sorted = [...data.matches].sort((a, b) => b.date.localeCompare(a.date));
+  for (const m of sorted) {
+    if (!Array.isArray(m.photos)) continue;
+    for (const photo of m.photos) {
+      all.push({ photo, date: m.date, stadium: m.stadium || '' });
+    }
+  }
+
+  if (!all.length) {
+    strip.innerHTML = '<div class="empty">Sin fotos todavía</div>';
+    return;
+  }
+
+  strip.dataset.photos = JSON.stringify(all.map(a => a.photo));
+  strip.innerHTML = all.map((p, i) => `
+    <button class="gallery-item" data-index="${i}" aria-label="Abrir foto">
+      <img src="${p.photo}" alt="" loading="lazy">
+      <span class="gallery-item-label">${formatDate(p.date)}${p.stadium ? ' · ' + p.stadium : ''}</span>
+    </button>
+  `).join('');
 }
 
 function renderHeroNote() {
@@ -404,6 +456,14 @@ document.addEventListener('click', (e) => {
     openLightbox(photos, index);
     return;
   }
+  const galleryItem = e.target.closest('.gallery-item');
+  if (galleryItem) {
+    const strip = document.getElementById('gallery-strip');
+    const photos = JSON.parse(strip.dataset.photos || '[]');
+    const index = parseInt(galleryItem.dataset.index, 10);
+    if (photos.length) openLightbox(photos, index);
+    return;
+  }
   const av = e.target.closest('.avatar.avatar-clickable');
   if (av) {
     const img = av.querySelector('img');
@@ -415,9 +475,11 @@ async function init() {
   try {
     const data = await loadData();
     const stats = computePlayerStats(data);
+    setHeroBackground(data);
     renderHeroStats(data);
     renderHeroNote();
     renderSpotlights(stats);
+    renderGallery(data);
     renderPodiums(stats);
     renderPlayerFilter(data, stats);
     renderMatches(data);
