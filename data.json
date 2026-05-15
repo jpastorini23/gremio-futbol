@@ -40,6 +40,20 @@
       "title": "Chiche sin sentido",
       "player": "Mati",
       "text": "Tiene dos caños y perdió las dos"
+    },
+    {
+      "icon": "🙃",
+      "accent": "red",
+      "title": "Goles sin sentido",
+      "player": "Minu",
+      "text": "Salió goleador pero se llevó una derrota más a la estadística"
+    },
+    {
+      "icon": "🌿",
+      "accent": "red",
+      "title": "Faltó el porrero",
+      "player": "Juani",
+      "text": "Se extrañó el todoterreno del primer partido"
     }
   ],
   "matches": [
