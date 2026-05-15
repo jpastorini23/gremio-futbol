@@ -62,29 +62,82 @@ function generateHighlights(data) {
   return facts;
 }
 
+const highlightsState = {
+  facts: [],
+  index: 0,
+  expanded: false,
+  intervalId: null
+};
+
+function factCardHtml(f, large) {
+  return `
+    <div class="fact-card fact-${f.accent} ${large ? 'fact-card-large' : ''}">
+      <div class="fact-icon">${f.icon}</div>
+      <div class="fact-body">
+        <span class="fact-title">${f.title}</span>
+        <div class="fact-player-row">
+          ${avatar(f.player, large ? 'md' : 'sm')}
+          <span class="fact-player">${f.player}</span>
+        </div>
+        <span class="fact-text">${f.text}</span>
+      </div>
+    </div>
+  `;
+}
+
 function renderHighlights(data, stats) {
   const el = document.getElementById('highlights');
   const facts = generateHighlights(data, stats);
   if (!facts.length) { el.innerHTML = ''; return; }
 
+  highlightsState.facts = facts;
+  if (highlightsState.index >= facts.length) highlightsState.index = 0;
+
   el.innerHTML = `
-    <h2 class="section-title highlights-title">Lo que opina la gente</h2>
-    <div class="highlights-grid">
-      ${facts.map(f => `
-        <div class="fact-card fact-${f.accent}">
-          <div class="fact-icon">${f.icon}</div>
-          <div class="fact-body">
-            <span class="fact-title">${f.title}</span>
-            <div class="fact-player-row">
-              ${avatar(f.player, 'sm')}
-              <span class="fact-player">${f.player}</span>
-            </div>
-            <span class="fact-text">${f.text}</span>
-          </div>
-        </div>
-      `).join('')}
+    <div class="highlights-head">
+      <h2 class="section-title highlights-title">Lo que opina la gente</h2>
+      <button class="highlights-toggle" id="highlights-toggle">${highlightsState.expanded ? 'Ver una' : `Ver todas (${facts.length})`}</button>
     </div>
+    <div class="highlights-content" id="highlights-content"></div>
   `;
+  renderHighlightsContent();
+  if (!highlightsState.expanded) startHighlightsRotation();
+}
+
+function renderHighlightsContent() {
+  const content = document.getElementById('highlights-content');
+  if (!content) return;
+  const facts = highlightsState.facts;
+  if (highlightsState.expanded) {
+    stopHighlightsRotation();
+    content.innerHTML = `<div class="highlights-grid">${facts.map(f => factCardHtml(f, false)).join('')}</div>`;
+  } else {
+    const f = facts[highlightsState.index];
+    content.innerHTML = `
+      <div class="highlights-single" key="${highlightsState.index}">
+        ${factCardHtml(f, true)}
+        <div class="highlights-dots">
+          ${facts.map((_, i) => `<button class="hl-dot ${i === highlightsState.index ? 'active' : ''}" data-dot="${i}" aria-label="Ir a ${i + 1}"></button>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+}
+
+function startHighlightsRotation() {
+  stopHighlightsRotation();
+  if (highlightsState.facts.length <= 1) return;
+  highlightsState.intervalId = setInterval(() => {
+    highlightsState.index = (highlightsState.index + 1) % highlightsState.facts.length;
+    renderHighlightsContent();
+  }, 5000);
+}
+
+function stopHighlightsRotation() {
+  if (highlightsState.intervalId) {
+    clearInterval(highlightsState.intervalId);
+    highlightsState.intervalId = null;
+  }
 }
 
 function renderNextMatch(data) {
@@ -537,6 +590,22 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+  const hlToggle = e.target.closest('#highlights-toggle');
+  if (hlToggle) {
+    highlightsState.expanded = !highlightsState.expanded;
+    if (highlightsState.expanded) stopHighlightsRotation();
+    else { highlightsState.index = 0; startHighlightsRotation(); }
+    hlToggle.textContent = highlightsState.expanded ? 'Ver una' : `Ver todas (${highlightsState.facts.length})`;
+    renderHighlightsContent();
+    return;
+  }
+  const hlDot = e.target.closest('.hl-dot');
+  if (hlDot) {
+    highlightsState.index = parseInt(hlDot.dataset.dot, 10);
+    renderHighlightsContent();
+    startHighlightsRotation();
+    return;
+  }
   const expandBtn = e.target.closest('.podium-expand-btn');
   if (expandBtn) {
     togglePodium(expandBtn.dataset.target);
