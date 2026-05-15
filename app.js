@@ -105,6 +105,14 @@ function renderHeroStats(data) {
   `;
 }
 
+function renderHeroNote() {
+  document.getElementById('hero-note').innerHTML = `
+    <span>★ Figura del torneo <em>para los que saben de fútbol</em>:</span>
+    ${avatar('Juancho', 'sm')}
+    <strong>Juancho</strong>
+  `;
+}
+
 function renderSpotlights(stats) {
   const arr = Object.values(stats).filter(s => !s.isGuest);
 
@@ -405,6 +413,7 @@ async function init() {
     const data = await loadData();
     const stats = computePlayerStats(data);
     renderHeroStats(data);
+    renderHeroNote();
     renderSpotlights(stats);
     renderPodiums(stats);
     renderPlayerFilter(data, stats);

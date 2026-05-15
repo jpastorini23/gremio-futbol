@@ -150,6 +150,31 @@ html, body {
   margin-top: 4px;
 }
 
+.hero-note {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+  flex-wrap: wrap;
+}
+
+.hero-note em {
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.hero-note strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
