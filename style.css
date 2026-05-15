@@ -208,6 +208,96 @@ html, body {
   padding: 48px 24px;
 }
 
+.next-match {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+}
+
+.next-match-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: linear-gradient(135deg, rgba(0, 210, 106, 0.10), rgba(0, 210, 106, 0.02));
+  border: 1px solid rgba(0, 210, 106, 0.3);
+  border-radius: 16px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.5s ease-out backwards;
+}
+
+.next-match-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7); }
+  70% { box-shadow: 0 0 0 14px rgba(0, 210, 106, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0); }
+}
+
+.next-match-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.next-match-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  color: var(--accent);
+}
+
+.next-match-date {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+
+.next-match-countdown {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+.countdown-value {
+  font-size: 44px;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.countdown-unit {
+  font-size: 14px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+@media (max-width: 600px) {
+  .next-match-card {
+    padding: 16px 18px;
+    gap: 12px;
+  }
+  .next-match-date { font-size: 15px; }
+  .countdown-value { font-size: 36px; }
+}
+
+.stat-tile.streak-win .stat-tile-value { color: var(--accent); }
+.stat-tile.streak-loss .stat-tile-value { color: #d05a5a; }
+.stat-tile.streak-draw .stat-tile-value { color: var(--text-dim); }
+
 .gallery-section {
   max-width: 1200px;
   margin: 0 auto;

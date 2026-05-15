@@ -29,6 +29,48 @@ function formatDate(iso) {
   return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' });
 }
 
+function formatLongDate(d) {
+  return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function computeNextMatch(data) {
+  if (!data.matches.length) return null;
+  const lastIso = [...data.matches].map(m => m.date).sort().pop();
+  const next = new Date(lastIso + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  next.setDate(next.getDate() + 14);
+  while (next < today) next.setDate(next.getDate() + 14);
+  const diffDays = Math.round((next - today) / (1000 * 60 * 60 * 24));
+  return { date: next, diffDays };
+}
+
+function renderNextMatch(data) {
+  const el = document.getElementById('next-match');
+  const info = computeNextMatch(data);
+  if (!info) { el.innerHTML = ''; return; }
+
+  const { date, diffDays } = info;
+  let countdown;
+  if (diffDays === 0) countdown = '<span class="countdown-value">HOY</span>';
+  else if (diffDays === 1) countdown = '<span class="countdown-value">1</span><span class="countdown-unit">día</span>';
+  else countdown = `<span class="countdown-value">${diffDays}</span><span class="countdown-unit">días</span>`;
+
+  const dateStr = formatLongDate(date);
+  const dateCapitalized = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+  el.innerHTML = `
+    <div class="next-match-card">
+      <div class="next-match-pulse"></div>
+      <div class="next-match-info">
+        <span class="next-match-label">Próximo partido</span>
+        <span class="next-match-date">${dateCapitalized}</span>
+      </div>
+      <div class="next-match-countdown">${countdown}</div>
+    </div>
+  `;
+}
+
 function computePlayerStats(data) {
   const regulars = new Set(data.players);
   const allNames = new Set(data.players);
@@ -109,6 +151,23 @@ function renderHeroStats(data) {
   `).join('');
 
   document.querySelectorAll('.hero-stat-value').forEach(el => animateNumber(el, +el.dataset.target));
+}
+
+function computeStreak(matches) {
+  if (!matches.length) return { type: 'none', count: 0, icon: '', label: 'Sin partidos' };
+  const sorted = [...matches].sort((a, b) => b.date.localeCompare(a.date));
+  const recent = sorted[0].outcome;
+  let count = 0;
+  for (const m of sorted) {
+    if (m.outcome === recent) count++;
+    else break;
+  }
+  const meta = {
+    win: { icon: '🔥', label: count === 1 ? 'Ganó último' : 'Racha ganadora' },
+    loss: { icon: '❄️', label: count === 1 ? 'Perdió último' : 'Racha perdedora' },
+    draw: { icon: '🤝', label: count === 1 ? 'Empató último' : 'Racha de empates' },
+  }[recent] || { icon: '', label: 'Sin racha' };
+  return { type: recent, count, icon: meta.icon + ' ', label: meta.label };
 }
 
 function animateNumber(el, target, duration = 900) {
@@ -299,11 +358,13 @@ function renderPlayerView(s) {
   const points = s.wins * 3 + s.draws;
   const maxPoints = s.played * 3;
   const pointsPct = maxPoints ? Math.round((points / maxPoints) * 100) : 0;
+  const streak = computeStreak(s.matches);
 
   statsEl.innerHTML = `
     <div class="stat-tile"><div class="stat-tile-value">${s.played}</div><div class="stat-tile-label">Partidos</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${s.wins}-${s.draws}-${s.losses}</div><div class="stat-tile-label">G - E - P</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${pointsPct}%</div><div class="stat-tile-label">% Puntos (${points}/${maxPoints})</div></div>
+    <div class="stat-tile streak-${streak.type}"><div class="stat-tile-value">${streak.icon}${streak.count}</div><div class="stat-tile-label">${streak.label}</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${s.mvps}</div><div class="stat-tile-label">MVPs</div></div>
     <div class="stat-tile"><div class="stat-tile-value">${s.goleadorCount}</div><div class="stat-tile-label">Goleador</div></div>
   `;
@@ -468,6 +529,7 @@ async function init() {
     renderHeroStats(data);
     renderHeroNote();
     renderSpotlights(stats);
+    renderNextMatch(data);
     renderGallery(data);
     renderPodiums(stats);
     renderPlayerFilter(data, stats);
