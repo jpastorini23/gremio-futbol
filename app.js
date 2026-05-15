@@ -135,20 +135,42 @@ function renderSpotlight(label, player, sub) {
   `;
 }
 
-function renderPodium(id, items) {
+const podiumState = {};
+
+function renderPodium(id, items, opts = {}) {
+  podiumState[id] = { items, opts };
   const el = document.getElementById(id);
   if (!items.length) {
     el.innerHTML = '<li class="empty">Sin datos todavía</li>';
     return;
   }
-  el.innerHTML = items.map((it, i) => `
+  const expanded = !!opts.expanded;
+  const visible = expanded ? items : items.slice(0, 5);
+
+  let html = visible.map((it, i) => `
     <li class="podium-item rank-${i + 1}">
       <span class="podium-rank">${i + 1}</span>
       ${avatar(it.name, 'sm')}
       <span class="podium-name">${it.name}${it.isGuest ? ' <span class="guest-tag">inv</span>' : ''}</span>
-      <span class="podium-value">${it.value}</span>
+      <span class="podium-value">${it.value}${it.sub ? `<span class="podium-sub">${it.sub}</span>` : ''}</span>
     </li>
   `).join('');
+
+  if (opts.expandable && items.length > 5) {
+    html += `<li class="podium-expand">
+      <button class="podium-expand-btn" data-target="${id}">
+        ${expanded ? '▲ Ver menos' : `▼ Ver todos (${items.length})`}
+      </button>
+    </li>`;
+  }
+  el.innerHTML = html;
+}
+
+function togglePodium(id) {
+  const state = podiumState[id];
+  if (!state) return;
+  state.opts.expanded = !state.opts.expanded;
+  renderPodium(id, state.items, state.opts);
 }
 
 function renderPodiums(stats) {
@@ -177,9 +199,13 @@ function renderPodiums(stats) {
       return { name: s.name, value: pct, isGuest: s.isGuest, played: s.played, points, max };
     })
     .sort((a, b) => b.value - a.value || b.played - a.played)
-    .slice(0, 5)
-    .map(s => ({ name: s.name, value: s.value + '%', isGuest: s.isGuest }));
-  renderPodium('top-winrate', pointsPct);
+    .map(s => ({
+      name: s.name,
+      value: s.value + '%',
+      sub: `${s.played} PJ`,
+      isGuest: s.isGuest
+    }));
+  renderPodium('top-winrate', pointsPct, { expandable: true });
 }
 
 function renderPlayerFilter(data, stats) {
@@ -355,6 +381,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+  const expandBtn = e.target.closest('.podium-expand-btn');
+  if (expandBtn) {
+    togglePodium(expandBtn.dataset.target);
+    return;
+  }
   if (e.target.classList.contains('match-thumb')) {
     const container = e.target.closest('.match-photos');
     const photos = JSON.parse(container.dataset.photos);
