@@ -122,16 +122,6 @@ function animateNumber(el, target, duration = 900) {
   requestAnimationFrame(step);
 }
 
-function setHeroBackground(data) {
-  const recent = [...data.matches]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .find(m => Array.isArray(m.photos) && m.photos.length);
-  if (!recent) return;
-  const bg = document.getElementById('hero-bg');
-  bg.style.backgroundImage = `url('${recent.photos[0]}')`;
-  bg.classList.add('hero-bg-visible');
-}
-
 function renderGallery(data) {
   const strip = document.getElementById('gallery-strip');
   const all = [];
@@ -475,7 +465,6 @@ async function init() {
   try {
     const data = await loadData();
     const stats = computePlayerStats(data);
-    setHeroBackground(data);
     renderHeroStats(data);
     renderHeroNote();
     renderSpotlights(stats);
