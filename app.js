@@ -108,7 +108,7 @@ function renderHeroStats(data) {
 function renderHeroNote() {
   document.getElementById('hero-note').innerHTML = `
     <span>★ Figura del torneo <em>para los que saben de fútbol</em>:</span>
-    ${avatar('Juancho', 'sm')}
+    ${avatar('Juancho', 'md')}
     <strong>Juancho</strong>
   `;
 }
