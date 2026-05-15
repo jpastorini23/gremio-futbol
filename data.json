@@ -12,6 +12,15 @@
     "Luki",
     "Rama"
   ],
+  "manualHighlights": [
+    {
+      "icon": "🎯",
+      "accent": "red",
+      "title": "Pichichi en sequía",
+      "player": "Fede",
+      "text": "Efectividad de 2 goles cada 10 tiros"
+    }
+  ],
   "matches": [
     {
       "date": "2026-05-14",

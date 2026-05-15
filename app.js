@@ -56,6 +56,19 @@ function generateHighlights(data, stats) {
     facts.push(f);
   };
 
+  if (Array.isArray(data.manualHighlights)) {
+    for (const m of data.manualHighlights) {
+      pushFact({
+        kind: 'manual-' + (m.title || m.player || ''),
+        icon: m.icon || '✨',
+        accent: m.accent || 'gold',
+        title: m.title || '',
+        player: m.player || '',
+        text: m.text || ''
+      });
+    }
+  }
+
   for (const s of arr) {
     const streak = computeStreak(s.matches);
     const last = [...s.matches].sort((a, b) => b.date.localeCompare(a.date))[0];
@@ -151,7 +164,7 @@ function generateHighlights(data, stats) {
     });
   }
 
-  return facts.slice(0, 4);
+  return facts.slice(0, 6);
 }
 
 function renderHighlights(data, stats) {
