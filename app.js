@@ -45,20 +45,11 @@ function computeNextMatch(data) {
   return { date: next, diffDays };
 }
 
-function generateHighlights(data, stats) {
-  const arr = Object.values(stats).filter(s => s.played > 0 && !s.isGuest);
+function generateHighlights(data) {
   const facts = [];
-  const used = new Set();
-
-  const pushFact = (f) => {
-    if (used.has(f.player + f.kind)) return;
-    used.add(f.player + f.kind);
-    facts.push(f);
-  };
-
   if (Array.isArray(data.manualHighlights)) {
     for (const m of data.manualHighlights) {
-      pushFact({
+      facts.push({
         kind: 'manual-' + (m.title || m.player || ''),
         icon: m.icon || '✨',
         accent: m.accent || 'gold',
@@ -68,131 +59,7 @@ function generateHighlights(data, stats) {
       });
     }
   }
-
-  for (const s of arr) {
-    const streak = computeStreak(s.matches);
-    const last = [...s.matches].sort((a, b) => b.date.localeCompare(a.date))[0];
-    if (streak.type === 'win' && last.mvp) {
-      pushFact({
-        kind: 'hot-mvp',
-        icon: '🔥',
-        accent: 'green',
-        title: 'En racha',
-        player: s.name,
-        text: streak.count > 1
-          ? `Ganó ${streak.count} al hilo y fue figura en el último`
-          : 'Ganó el último y fue elegido figura del partido'
-      });
-    }
-  }
-
-  const debutWinners = arr.filter(s => s.played === 1 && s.wins === 1);
-  for (const s of debutWinners.slice(0, 1)) {
-    pushFact({
-      kind: 'debut',
-      icon: '🚀',
-      accent: 'green',
-      title: 'Debutó y la rompió',
-      player: s.name,
-      text: 'Jugó su primer partido y ganó'
-    });
-  }
-
-  const topGol = arr.filter(s => s.goleadorCount > 0).sort((a, b) => b.goleadorCount - a.goleadorCount)[0];
-  if (topGol) {
-    pushFact({
-      kind: 'killer',
-      icon: '⚽',
-      accent: 'green',
-      title: 'Killer del gol',
-      player: topGol.name,
-      text: topGol.goleadorCount === 1 ? 'Goleador del último partido' : `${topGol.goleadorCount} veces goleador del partido`
-    });
-  }
-
-  const topMvp = arr.filter(s => s.mvps > 0).sort((a, b) => b.mvps - a.mvps)[0];
-  if (topMvp && topMvp.mvps >= 2) {
-    pushFact({
-      kind: 'mvp-king',
-      icon: '⭐',
-      accent: 'gold',
-      title: 'Figura repetida',
-      player: topMvp.name,
-      text: `${topMvp.mvps} veces elegido figura del partido`
-    });
-  }
-
-  const losingStreaks = arr.map(s => ({ s, st: computeStreak(s.matches) })).filter(x => x.st.type === 'loss');
-  losingStreaks.sort((a, b) => b.st.count - a.st.count || b.s.losses - a.s.losses);
-  const cold = losingStreaks[0];
-  if (cold) {
-    pushFact({
-      kind: 'cold',
-      icon: '❄️',
-      accent: 'red',
-      title: 'En sequía',
-      player: cold.s.name,
-      text: cold.st.count > 1 ? `${cold.st.count} derrotas al hilo` : 'Perdió el último partido'
-    });
-  }
-
-  const ptsArr = arr.filter(s => s.played >= 2).map(s => {
-    const pts = s.wins * 3 + s.draws;
-    const max = s.played * 3;
-    return { s, pts, max, pct: max ? (pts / max) * 100 : 0 };
-  }).sort((a, b) => b.pct - a.pct || b.s.played - a.s.played);
-  const topPts = ptsArr[0];
-  if (topPts && topPts.pct >= 60) {
-    pushFact({
-      kind: 'points-king',
-      icon: '📈',
-      accent: 'green',
-      title: 'Manija de puntos',
-      player: topPts.s.name,
-      text: `${Math.round(topPts.pct)}% de puntos posibles (${topPts.pts}/${topPts.max})`
-    });
-  }
-  const bottomPts = ptsArr[ptsArr.length - 1];
-  if (bottomPts && bottomPts !== topPts && bottomPts.pct <= 40) {
-    pushFact({
-      kind: 'points-bottom',
-      icon: '🥶',
-      accent: 'red',
-      title: 'Le cuesta sumar',
-      player: bottomPts.s.name,
-      text: `Solo ${Math.round(bottomPts.pct)}% de puntos posibles`
-    });
-  }
-
-  const sinAlegrias = arr.filter(s => s.played >= 2 && s.wins === 0 && s.mvps === 0 && s.goleadorCount === 0);
-  if (sinAlegrias.length) {
-    const candidate = sinAlegrias.sort((a, b) => b.played - a.played)[0];
-    pushFact({
-      kind: 'sin-alegrias',
-      icon: '😶',
-      accent: 'red',
-      title: 'Sin alegrías',
-      player: candidate.name,
-      text: `${candidate.played} partidos sin ganar, sin MVP, sin goles`
-    });
-  }
-
-  const sinMvp = arr.filter(s => s.played >= 2 && s.mvps === 0);
-  if (sinMvp.length) {
-    const candidate = sinMvp.sort((a, b) => b.played - a.played)[0];
-    if (!facts.some(f => f.player === candidate.name)) {
-      pushFact({
-        kind: 'sin-mvp',
-        icon: '🫥',
-        accent: 'red',
-        title: 'Le huye al MVP',
-        player: candidate.name,
-        text: `${candidate.played} partidos jugados y todavía sin ser figura`
-      });
-    }
-  }
-
-  return facts.slice(0, 6);
+  return facts;
 }
 
 function renderHighlights(data, stats) {
@@ -201,7 +68,7 @@ function renderHighlights(data, stats) {
   if (!facts.length) { el.innerHTML = ''; return; }
 
   el.innerHTML = `
-    <h2 class="section-title highlights-title">Highlights</h2>
+    <h2 class="section-title highlights-title">Lo que opina la gente</h2>
     <div class="highlights-grid">
       ${facts.map(f => `
         <div class="fact-card fact-${f.accent}">
