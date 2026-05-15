@@ -298,6 +298,107 @@ html, body {
 .stat-tile.streak-loss .stat-tile-value { color: #d05a5a; }
 .stat-tile.streak-draw .stat-tile-value { color: var(--text-dim); }
 
+.highlights {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 0;
+  animation: fadeUp 0.5s ease-out backwards;
+}
+
+.highlights-title {
+  margin-bottom: 18px;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.fact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.fact-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+}
+
+.fact-card.fact-gold::before { background: var(--gold); }
+.fact-card.fact-red::before { background: #d05a5a; }
+
+.fact-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 210, 106, 0.25);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.fact-card.fact-gold:hover { border-color: rgba(255, 200, 87, 0.3); }
+.fact-card.fact-red:hover { border-color: rgba(208, 90, 90, 0.35); }
+
+.fact-icon {
+  font-size: 24px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elev);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.fact-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.fact-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: var(--accent);
+}
+
+.fact-card.fact-gold .fact-title { color: var(--gold); }
+.fact-card.fact-red .fact-title { color: #d05a5a; }
+
+.fact-player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fact-player {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.fact-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
 .gallery-section {
   max-width: 1200px;
   margin: 0 auto;
