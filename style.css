@@ -105,15 +105,16 @@ html, body {
 .hero-spotlight.right { justify-self: start; }
 
 .spotlight-label {
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.4px;
   color: var(--text-dim);
+  font-weight: 600;
 }
 
 .spotlight-name {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: var(--text);
 }
 
