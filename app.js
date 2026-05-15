@@ -219,7 +219,7 @@ function renderPodiums(stats) {
 function renderPlayerFilter(data, stats) {
   const select = document.getElementById('player-filter');
   const sorted = Object.values(stats).sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  select.innerHTML = sorted.map(s =>
+  select.innerHTML = '<option value="">Elegí un jugador…</option>' + sorted.map(s =>
     `<option value="${s.name}">${s.name}${s.isGuest ? ' (invitado)' : ''}</option>`
   ).join('');
 
@@ -234,7 +234,7 @@ function renderPlayerView(s) {
   const historyEl = document.getElementById('player-history');
 
   if (!s) {
-    heroEl.innerHTML = '';
+    heroEl.innerHTML = '<div class="player-prompt">Elegí un jugador del menú para ver sus stats y su historial partido a partido.</div>';
     statsEl.innerHTML = '';
     historyEl.innerHTML = '';
     return;
