@@ -130,7 +130,7 @@ function generateHighlights(data, stats) {
       kind: 'cold',
       icon: '❄️',
       accent: 'red',
-      title: 'Pichichi en sequía',
+      title: 'En sequía',
       player: cold.s.name,
       text: cold.st.count > 1 ? `${cold.st.count} derrotas al hilo` : 'Perdió el último partido'
     });
