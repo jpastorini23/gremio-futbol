@@ -20,7 +20,11 @@
       "winner": "oscuros",
       "goleador": "Minu",
       "mvp": "Mati",
-      "photos": ["img/matches/2026-05-14/equipo.jpg"],
+      "photos": [
+        "img/matches/2026-05-14/equipo.jpg",
+        "img/matches/2026-05-14/cena.jpg",
+        "img/matches/2026-05-14/festejo.jpg"
+      ],
       "notes": ""
     },
     {
