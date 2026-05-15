@@ -39,7 +39,7 @@
       "accent": "red",
       "title": "Chiche sin sentido",
       "player": "Mati",
-      "text": "Tiene dos caños y perdió las dos"
+      "text": "Tiró dos caños, no tiene"
     },
     {
       "icon": "🙃",
@@ -54,6 +54,20 @@
       "title": "Faltó el porrero",
       "player": "Juani",
       "text": "Se extrañó el todoterreno del primer partido"
+    },
+    {
+      "icon": "📋",
+      "accent": "red",
+      "title": "El organizador de la derrota",
+      "player": "Juancho",
+      "text": "Pone mucho en organizar, pero pocos puntos"
+    },
+    {
+      "icon": "🥅",
+      "accent": "red",
+      "title": "Temas de definición",
+      "player": "Juli",
+      "text": "Tenía todo el arco y le rompió la cara al compañero"
     }
   ],
   "matches": [
