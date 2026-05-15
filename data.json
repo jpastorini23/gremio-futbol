@@ -19,6 +19,13 @@
       "title": "Pichichi en sequía",
       "player": "Fede",
       "text": "Efectividad de 2 goles cada 10 tiros"
+    },
+    {
+      "icon": "🥴",
+      "accent": "red",
+      "title": "Falto de aire",
+      "player": "Luki",
+      "text": "Dejó el aire en Banana, no podía correr de tanto salir"
     }
   ],
   "matches": [

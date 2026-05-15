@@ -164,6 +164,34 @@ function generateHighlights(data, stats) {
     });
   }
 
+  const sinAlegrias = arr.filter(s => s.played >= 2 && s.wins === 0 && s.mvps === 0 && s.goleadorCount === 0);
+  if (sinAlegrias.length) {
+    const candidate = sinAlegrias.sort((a, b) => b.played - a.played)[0];
+    pushFact({
+      kind: 'sin-alegrias',
+      icon: '😶',
+      accent: 'red',
+      title: 'Sin alegrías',
+      player: candidate.name,
+      text: `${candidate.played} partidos sin ganar, sin MVP, sin goles`
+    });
+  }
+
+  const sinMvp = arr.filter(s => s.played >= 2 && s.mvps === 0);
+  if (sinMvp.length) {
+    const candidate = sinMvp.sort((a, b) => b.played - a.played)[0];
+    if (!facts.some(f => f.player === candidate.name)) {
+      pushFact({
+        kind: 'sin-mvp',
+        icon: '🫥',
+        accent: 'red',
+        title: 'Le huye al MVP',
+        player: candidate.name,
+        text: `${candidate.played} partidos jugados y todavía sin ser figura`
+      });
+    }
+  }
+
   return facts.slice(0, 6);
 }
 
