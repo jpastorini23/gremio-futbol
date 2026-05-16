@@ -1281,10 +1281,86 @@ html, body {
   color: var(--text);
 }
 
-.music-popover iframe {
+.music-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.music-art {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-elev);
+  position: relative;
+}
+
+.music-art img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  display: block;
-  border: 0;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.4);
+}
+
+.music-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.music-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-artist {
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.music-play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #0a0e0c;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-left: 2px;
+  transition: transform 0.15s;
+}
+
+.music-play.is-playing { padding-left: 0; }
+
+.music-play:hover {
+  transform: scale(1.08);
+}
+
+.music-yt-host {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 @media (max-width: 600px) {

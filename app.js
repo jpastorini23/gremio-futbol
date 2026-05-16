@@ -624,16 +624,26 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+  const musicPlay = e.target.closest('#music-play');
+  if (musicPlay) {
+    if (!ytReady || !ytPlayer) return;
+    const state = ytPlayer.getPlayerState();
+    if (state === 1) {
+      ytPlayer.pauseVideo();
+    } else {
+      if (state === 0) ytPlayer.seekTo(0);
+      ytPlayer.playVideo();
+    }
+    return;
+  }
   const musicClose = e.target.closest('#music-close');
   if (musicClose) {
     document.getElementById('music-popover').hidden = true;
-    document.getElementById('music-iframe').src = '';
     document.getElementById('music-trigger').hidden = false;
     return;
   }
   const musicTrigger = e.target.closest('#music-trigger');
   if (musicTrigger) {
-    document.getElementById('music-iframe').src = 'https://www.youtube.com/embed/ijnujobdJ4c?rel=0&modestbranding=1';
     document.getElementById('music-popover').hidden = false;
     musicTrigger.hidden = true;
     return;
@@ -681,6 +691,49 @@ document.addEventListener('click', (e) => {
   }
 });
 
+let ytPlayer = null;
+let ytReady = false;
+
+function setupMusicPlayer() {
+  if (window.YT && window.YT.Player) {
+    createYtPlayer();
+  } else {
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (prev) prev();
+      createYtPlayer();
+    };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  }
+}
+
+function createYtPlayer() {
+  ytPlayer = new YT.Player('music-yt-mount', {
+    videoId: 'ijnujobdJ4c',
+    width: '1',
+    height: '1',
+    playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
+    events: {
+      onReady: () => { ytReady = true; },
+      onStateChange: (e) => {
+        const btn = document.getElementById('music-play');
+        if (!btn) return;
+        if (e.data === 1) {
+          btn.textContent = '⏸';
+          btn.classList.add('is-playing');
+          btn.setAttribute('aria-label', 'Pausar');
+        } else {
+          btn.textContent = '▶';
+          btn.classList.remove('is-playing');
+          btn.setAttribute('aria-label', 'Reproducir');
+        }
+      }
+    }
+  });
+}
+
 async function init() {
   try {
     const data = await loadData();
@@ -700,3 +753,4 @@ async function init() {
 }
 
 init();
+setupMusicPlayer();

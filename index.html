@@ -40,24 +40,25 @@
     </div>
   </header>
 
-  <aside class="music-corner is-open" id="music-corner">
+  <aside class="music-corner" id="music-corner">
     <div class="music-popover" id="music-popover">
       <div class="music-header">
         <span class="music-label">🎵 Tema del gremio</span>
         <button class="music-close" id="music-close" aria-label="Minimizar">−</button>
       </div>
-      <iframe
-        id="music-iframe"
-        src="https://www.youtube.com/embed/ijnujobdJ4c?rel=0&modestbranding=1"
-        width="100%"
-        height="200"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-        title="Tema del gremio">
-      </iframe>
+      <div class="music-track">
+        <div class="music-art">
+          <img src="https://i.ytimg.com/vi/ijnujobdJ4c/mqdefault.jpg" alt="">
+        </div>
+        <div class="music-info">
+          <div class="music-title">Magalenha</div>
+          <div class="music-artist">Sérgio Mendes</div>
+        </div>
+        <button class="music-play" id="music-play" aria-label="Reproducir">▶</button>
+      </div>
     </div>
     <button class="music-trigger" id="music-trigger" hidden aria-label="Mostrar música">🎵</button>
+    <div class="music-yt-host"><div id="music-yt-mount"></div></div>
   </aside>
 
   <section class="next-match" id="next-match"></section>
