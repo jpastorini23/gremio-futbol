@@ -624,6 +624,11 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
+  const spToggle = e.target.closest('#spotify-toggle');
+  if (spToggle) {
+    document.getElementById('spotify-float').classList.toggle('collapsed');
+    return;
+  }
   const hlToggle = e.target.closest('#highlights-toggle');
   if (hlToggle) {
     highlightsState.expanded = !highlightsState.expanded;

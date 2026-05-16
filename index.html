@@ -40,19 +40,21 @@
     </div>
   </header>
 
-  <section class="spotify-section">
-    <div class="spotify-label">🎵 Tema del gremio · dale play</div>
-    <iframe
-      src="https://open.spotify.com/embed/track/36SJ7ZFx8J1f1RsewmUwMX?utm_source=generator&autoplay=1"
-      width="100%"
-      height="152"
-      frameborder="0"
-      allowtransparency="true"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="eager"
-      title="Tema del gremio">
-    </iframe>
-  </section>
+  <aside class="spotify-float" id="spotify-float">
+    <button class="spotify-toggle" id="spotify-toggle" aria-label="Mostrar/ocultar player">🎵</button>
+    <div class="spotify-player">
+      <iframe
+        src="https://open.spotify.com/embed/track/36SJ7ZFx8J1f1RsewmUwMX?utm_source=generator"
+        width="100%"
+        height="80"
+        frameborder="0"
+        allowtransparency="true"
+        allow="encrypted-media; clipboard-write"
+        loading="lazy"
+        title="Tema del gremio">
+      </iframe>
+    </div>
+  </aside>
 
   <section class="next-match" id="next-match"></section>
 
