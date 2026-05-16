@@ -1201,12 +1201,36 @@ html, body {
   padding: 20px;
 }
 
+.spotify-section {
+  max-width: 600px;
+  margin: 64px auto 0;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.spotify-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.spotify-section iframe {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+  border: 0;
+}
+
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 28px 24px;
   text-align: center;
   color: var(--text-dim);
   font-size: 13px;
+  margin-top: 40px;
 }
 
 .lightbox {
