@@ -635,7 +635,7 @@ document.addEventListener('click', (e) => {
       iframe.src = '';
       corner.classList.remove('is-open');
     } else {
-      iframe.src = 'https://open.spotify.com/embed/track/36SJ7ZFx8J1f1RsewmUwMX?utm_source=generator&cb=' + Date.now();
+      iframe.src = 'https://www.youtube.com/embed/ijnujobdJ4c?rel=0&modestbranding=1&autoplay=1';
       pop.hidden = false;
       corner.classList.add('is-open');
     }
