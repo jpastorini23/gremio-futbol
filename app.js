@@ -624,30 +624,19 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
-  const musicTrigger = e.target.closest('#music-trigger');
-  if (musicTrigger) {
-    const corner = document.getElementById('music-corner');
-    const pop = document.getElementById('music-popover');
-    const iframe = document.getElementById('music-iframe');
-    const isOpen = !pop.hidden;
-    if (isOpen) {
-      pop.hidden = true;
-      iframe.src = '';
-      corner.classList.remove('is-open');
-    } else {
-      iframe.src = 'https://www.youtube.com/embed/ijnujobdJ4c?rel=0&modestbranding=1&autoplay=1';
-      pop.hidden = false;
-      corner.classList.add('is-open');
-    }
+  const musicClose = e.target.closest('#music-close');
+  if (musicClose) {
+    document.getElementById('music-popover').hidden = true;
+    document.getElementById('music-iframe').src = '';
+    document.getElementById('music-trigger').hidden = false;
     return;
   }
-  if (!e.target.closest('#music-corner')) {
-    const pop = document.getElementById('music-popover');
-    if (pop && !pop.hidden) {
-      pop.hidden = true;
-      document.getElementById('music-iframe').src = '';
-      document.getElementById('music-corner').classList.remove('is-open');
-    }
+  const musicTrigger = e.target.closest('#music-trigger');
+  if (musicTrigger) {
+    document.getElementById('music-iframe').src = 'https://www.youtube.com/embed/ijnujobdJ4c?rel=0&modestbranding=1';
+    document.getElementById('music-popover').hidden = false;
+    musicTrigger.hidden = true;
+    return;
   }
   const hlToggle = e.target.closest('#highlights-toggle');
   if (hlToggle) {

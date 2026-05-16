@@ -40,20 +40,24 @@
     </div>
   </header>
 
-  <aside class="music-corner" id="music-corner">
-    <button class="music-trigger" id="music-trigger" aria-label="Reproducir música">🎵</button>
-    <div class="music-popover" id="music-popover" hidden>
+  <aside class="music-corner is-open" id="music-corner">
+    <div class="music-popover" id="music-popover">
+      <div class="music-header">
+        <span class="music-label">🎵 Tema del gremio</span>
+        <button class="music-close" id="music-close" aria-label="Minimizar">−</button>
+      </div>
       <iframe
         id="music-iframe"
-        src=""
+        src="https://www.youtube.com/embed/ijnujobdJ4c?rel=0&modestbranding=1"
         width="100%"
-        height="180"
+        height="200"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
         title="Tema del gremio">
       </iframe>
     </div>
+    <button class="music-trigger" id="music-trigger" hidden aria-label="Mostrar música">🎵</button>
   </aside>
 
   <section class="next-match" id="next-match"></section>
