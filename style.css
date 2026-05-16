@@ -1202,19 +1202,19 @@ html, body {
 }
 
 .spotify-section {
-  max-width: 600px;
-  margin: 64px auto 0;
+  max-width: 700px;
+  margin: 32px auto 0;
   padding: 0 24px;
   text-align: center;
 }
 
 .spotify-label {
-  font-size: 11px;
-  color: var(--text-dim);
+  font-size: 12px;
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  margin-bottom: 12px;
-  font-weight: 600;
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .spotify-section iframe {
