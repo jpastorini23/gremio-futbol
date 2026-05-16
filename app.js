@@ -140,30 +140,64 @@ function stopHighlightsRotation() {
   }
 }
 
-function renderNextMatch(data) {
-  const el = document.getElementById('next-match');
-  const info = computeNextMatch(data);
-  if (!info) { el.innerHTML = ''; return; }
+function countdownHtml(diffDays) {
+  if (diffDays === 0) return '<span class="countdown-value">HOY</span>';
+  if (diffDays === 1) return '<span class="countdown-value">1</span><span class="countdown-unit">día</span>';
+  return `<span class="countdown-value">${diffDays}</span><span class="countdown-unit">días</span>`;
+}
 
-  const { date, diffDays } = info;
-  let countdown;
-  if (diffDays === 0) countdown = '<span class="countdown-value">HOY</span>';
-  else if (diffDays === 1) countdown = '<span class="countdown-value">1</span><span class="countdown-unit">día</span>';
-  else countdown = `<span class="countdown-value">${diffDays}</span><span class="countdown-unit">días</span>`;
-
-  const dateStr = formatLongDate(date);
-  const dateCapitalized = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
-
-  el.innerHTML = `
-    <div class="next-match-card">
+function countdownCardHtml({ label, dateText, subtitle, diffDays, accent }) {
+  return `
+    <div class="next-match-card countdown-${accent || 'green'}">
       <div class="next-match-pulse"></div>
       <div class="next-match-info">
-        <span class="next-match-label">Próximo partido</span>
-        <span class="next-match-date">${dateCapitalized}</span>
+        <span class="next-match-label">${label}</span>
+        <span class="next-match-date">${dateText}</span>
+        ${subtitle ? `<span class="next-match-sub">${subtitle}</span>` : ''}
       </div>
-      <div class="next-match-countdown">${countdown}</div>
+      <div class="next-match-countdown">${countdownHtml(diffDays)}</div>
     </div>
   `;
+}
+
+function diffFromToday(iso) {
+  const date = new Date(iso + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return { date, diffDays: Math.round((date - today) / (1000 * 60 * 60 * 24)) };
+}
+
+function renderNextMatch(data) {
+  const el = document.getElementById('next-match');
+  const cards = [];
+
+  const next = computeNextMatch(data);
+  if (next) {
+    const dateStr = formatLongDate(next.date);
+    cards.push(countdownCardHtml({
+      label: 'Próximo partido',
+      dateText: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
+      diffDays: next.diffDays,
+      accent: 'green'
+    }));
+  }
+
+  if (Array.isArray(data.events)) {
+    for (const ev of data.events) {
+      const { date, diffDays } = diffFromToday(ev.date);
+      if (diffDays < 0) continue;
+      const dateStr = formatLongDate(date);
+      cards.push(countdownCardHtml({
+        label: ev.label,
+        dateText: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
+        subtitle: ev.subtitle,
+        diffDays,
+        accent: ev.accent || 'gold'
+      }));
+    }
+  }
+
+  el.innerHTML = cards.length ? `<div class="countdown-grid">${cards.join('')}</div>` : '';
 }
 
 function computePlayerStats(data) {

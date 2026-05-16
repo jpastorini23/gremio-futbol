@@ -214,32 +214,45 @@ html, body {
   padding: 32px 24px 0;
 }
 
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 14px;
+}
+
 .next-match-card {
+  --pulse-rgb: 0, 210, 106;
+  --pulse-color: var(--accent);
   display: flex;
   align-items: center;
   gap: 18px;
-  background: linear-gradient(135deg, rgba(0, 210, 106, 0.10), rgba(0, 210, 106, 0.02));
-  border: 1px solid rgba(0, 210, 106, 0.3);
+  background: linear-gradient(135deg, rgba(var(--pulse-rgb), 0.10), rgba(var(--pulse-rgb), 0.02));
+  border: 1px solid rgba(var(--pulse-rgb), 0.3);
   border-radius: 16px;
   padding: 18px 24px;
   box-shadow: var(--shadow);
   animation: fadeUp 0.5s ease-out backwards;
 }
 
+.next-match-card.countdown-gold {
+  --pulse-rgb: 255, 200, 87;
+  --pulse-color: var(--gold);
+}
+
 .next-match-pulse {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7);
+  background: var(--pulse-color);
+  box-shadow: 0 0 0 0 rgba(var(--pulse-rgb), 0.7);
   animation: pulse 2s infinite;
   flex-shrink: 0;
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0.7); }
-  70% { box-shadow: 0 0 0 14px rgba(0, 210, 106, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 210, 106, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb, 0, 210, 106), 0.7); }
+  70% { box-shadow: 0 0 0 14px rgba(var(--pulse-rgb, 0, 210, 106), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--pulse-rgb, 0, 210, 106), 0); }
 }
 
 .next-match-info {
@@ -254,7 +267,7 @@ html, body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.6px;
-  color: var(--accent);
+  color: var(--pulse-color);
 }
 
 .next-match-date {
@@ -262,6 +275,14 @@ html, body {
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.3px;
+}
+
+.next-match-sub {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-top: 2px;
+  letter-spacing: 0.2px;
 }
 
 .next-match-countdown {
@@ -273,7 +294,7 @@ html, body {
 
 .countdown-value {
   font-size: 44px;
-  color: var(--accent);
+  color: var(--pulse-color);
   line-height: 1;
   letter-spacing: 1px;
 }

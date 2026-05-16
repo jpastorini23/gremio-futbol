@@ -12,6 +12,14 @@
     "Luki",
     "Rama"
   ],
+  "events": [
+    {
+      "label": "Hasta que Mati se nos vaya",
+      "date": "2026-07-31",
+      "subtitle": "¿De luto el fútbol o sonríe la pelota?",
+      "accent": "gold"
+    }
+  ],
   "manualHighlights": [
     {
       "icon": "🎯",
