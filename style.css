@@ -1201,57 +1201,57 @@ html, body {
   padding: 20px;
 }
 
-.spotify-float {
+.music-corner {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  top: 14px;
+  left: 14px;
   z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  transition: transform 0.25s ease;
 }
 
-.spotify-float.collapsed .spotify-player {
-  transform: scale(0.8) translateY(20px);
-  opacity: 0;
-  pointer-events: none;
-  height: 0;
-  overflow: hidden;
-}
-
-.spotify-toggle {
-  width: 48px;
-  height: 48px;
+.music-trigger {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #0a0e0c;
-  border: none;
+  background: rgba(0, 210, 106, 0.12);
+  border: 1px solid rgba(0, 210, 106, 0.35);
+  color: var(--accent);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-  transition: transform 0.15s, background 0.15s;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
 }
 
-.spotify-toggle:hover {
-  transform: scale(1.06);
+.music-trigger:hover {
+  background: rgba(0, 210, 106, 0.25);
+  transform: scale(1.08);
 }
 
-.spotify-player {
-  width: 340px;
-  padding: 10px;
+.music-corner.is-open .music-trigger {
+  background: var(--accent);
+  color: #0a0e0c;
+  border-color: var(--accent);
+}
+
+.music-popover {
+  position: absolute;
+  top: 46px;
+  left: 0;
+  width: 320px;
+  padding: 8px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-  transition: transform 0.25s ease, opacity 0.25s ease, height 0.25s ease;
+  animation: fadeUp 0.2s ease-out;
 }
 
-.spotify-player iframe {
+.music-popover[hidden] { display: none; }
+
+.music-popover iframe {
   width: 100%;
   border-radius: 8px;
   display: block;
@@ -1259,13 +1259,8 @@ html, body {
 }
 
 @media (max-width: 600px) {
-  .spotify-float {
-    bottom: 12px;
-    right: 12px;
-  }
-  .spotify-player {
-    width: calc(100vw - 24px);
-    max-width: 320px;
+  .music-popover {
+    width: calc(100vw - 28px);
   }
 }
 

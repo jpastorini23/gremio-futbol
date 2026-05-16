@@ -624,10 +624,30 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
-  const spToggle = e.target.closest('#spotify-toggle');
-  if (spToggle) {
-    document.getElementById('spotify-float').classList.toggle('collapsed');
+  const musicTrigger = e.target.closest('#music-trigger');
+  if (musicTrigger) {
+    const corner = document.getElementById('music-corner');
+    const pop = document.getElementById('music-popover');
+    const iframe = document.getElementById('music-iframe');
+    const isOpen = !pop.hidden;
+    if (isOpen) {
+      pop.hidden = true;
+      iframe.src = '';
+      corner.classList.remove('is-open');
+    } else {
+      iframe.src = 'https://open.spotify.com/embed/track/36SJ7ZFx8J1f1RsewmUwMX?utm_source=generator&cb=' + Date.now();
+      pop.hidden = false;
+      corner.classList.add('is-open');
+    }
     return;
+  }
+  if (!e.target.closest('#music-corner')) {
+    const pop = document.getElementById('music-popover');
+    if (pop && !pop.hidden) {
+      pop.hidden = true;
+      document.getElementById('music-iframe').src = '';
+      document.getElementById('music-corner').classList.remove('is-open');
+    }
   }
   const hlToggle = e.target.closest('#highlights-toggle');
   if (hlToggle) {
