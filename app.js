@@ -754,3 +754,10 @@ async function init() {
 
 init();
 setupMusicPlayer();
+
+if (window.innerWidth <= 720) {
+  const pop = document.getElementById('music-popover');
+  const trigger = document.getElementById('music-trigger');
+  if (pop) pop.hidden = true;
+  if (trigger) trigger.hidden = false;
+}

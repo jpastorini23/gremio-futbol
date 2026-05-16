@@ -1363,10 +1363,19 @@ html, body {
   pointer-events: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 720px) {
+  .music-corner {
+    top: auto;
+    left: auto;
+    bottom: 16px;
+    right: 16px;
+  }
   .music-popover {
-    width: calc(100vw - 28px);
-    max-width: 360px;
+    position: absolute;
+    bottom: 52px;
+    right: 0;
+    width: calc(100vw - 32px);
+    max-width: 380px;
   }
 }
 
