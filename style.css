@@ -1228,7 +1228,9 @@ html, body {
   transform: scale(1.08);
 }
 
-.music-trigger[hidden] { display: none; }
+.music-trigger { display: none; }
+.music-corner.collapsed .music-trigger { display: flex; }
+.music-corner.collapsed .music-popover { display: none; }
 
 .music-popover {
   width: 420px;
@@ -1240,7 +1242,6 @@ html, body {
   animation: fadeUp 0.3s ease-out;
 }
 
-.music-popover[hidden] { display: none; }
 
 .music-header {
   display: flex;
@@ -1370,6 +1371,8 @@ html, body {
     bottom: 16px;
     right: 16px;
   }
+  .music-corner:not(.expanded) .music-popover { display: none; }
+  .music-corner:not(.expanded) .music-trigger { display: flex; }
   .music-popover {
     position: absolute;
     bottom: 52px;

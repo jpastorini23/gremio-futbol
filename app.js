@@ -638,14 +638,16 @@ document.addEventListener('click', (e) => {
   }
   const musicClose = e.target.closest('#music-close');
   if (musicClose) {
-    document.getElementById('music-popover').hidden = true;
-    document.getElementById('music-trigger').hidden = false;
+    const corner = document.getElementById('music-corner');
+    corner.classList.add('collapsed');
+    corner.classList.remove('expanded');
     return;
   }
   const musicTrigger = e.target.closest('#music-trigger');
   if (musicTrigger) {
-    document.getElementById('music-popover').hidden = false;
-    musicTrigger.hidden = true;
+    const corner = document.getElementById('music-corner');
+    corner.classList.add('expanded');
+    corner.classList.remove('collapsed');
     return;
   }
   const hlToggle = e.target.closest('#highlights-toggle');
@@ -754,10 +756,3 @@ async function init() {
 
 init();
 setupMusicPlayer();
-
-if (window.innerWidth <= 720) {
-  const pop = document.getElementById('music-popover');
-  const trigger = document.getElementById('music-trigger');
-  if (pop) pop.hidden = true;
-  if (trigger) trigger.hidden = false;
-}
