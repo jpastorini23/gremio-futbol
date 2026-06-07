@@ -10,7 +10,8 @@
     "Gasti",
     "Juancho",
     "Luki",
-    "Rama"
+    "Rama",
+    "Sean"
   ],
   "events": [
     {
@@ -79,6 +80,20 @@
     }
   ],
   "matches": [
+    {
+      "date": "2026-06-04",
+      "claros": ["Gasti", "Rama", "Mati", "Juli", "Luki"],
+      "oscuros": ["Tincho", "Fede", "Minu", "Mickey", "Sean"],
+      "winner": "claros",
+      "goleador": "Juli",
+      "mvp": "Luki",
+      "stadium": "Malaver",
+      "photos": [
+        "img/matches/2026-06-04/goleador.jpg",
+        "img/matches/2026-06-04/figura.jpg"
+      ],
+      "notes": "Liga Gremio 2026 · Fecha 3"
+    },
     {
       "date": "2026-05-14",
       "claros": ["Gasti", "Minu", "Luki", "Juancho", "Mickey"],
