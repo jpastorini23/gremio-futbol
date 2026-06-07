@@ -166,7 +166,6 @@ function renderHeroNote(){
       <div class="legend-meta">
         <div class="legend-role">★ Figura del torneo <em>para los que saben de fútbol</em></div>
         <div class="legend-who">Juancho</div>
-        <div class="legend-sub">El crack que las estadísticas no entienden</div>
       </div>
     </div>`;
 }
