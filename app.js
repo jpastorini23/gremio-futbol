@@ -553,7 +553,6 @@ async function init(){
     renderStatstrip(DATA);
     renderSpotlights(STATS);
     renderHeroNote();
-    renderCountdowns(DATA);
     renderOpinions(DATA);
     renderGallery(DATA);
     renderPodiums(STATS);
