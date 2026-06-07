@@ -48,6 +48,7 @@
 
 *,*::before,*::after{ box-sizing:border-box; }
 html{ -webkit-text-size-adjust:100%; }
+html,body{ overflow-x:hidden; max-width:100%; }
 body{
   margin:0;
   background:var(--bg);
@@ -435,7 +436,10 @@ footer.foot{ margin:80px 0 40px; text-align:center; color:var(--text-mute); font
 }
 @media (max-width:520px){
   .wrap{ padding:0 16px; }
+  .gallery{ margin:0 -16px; padding-left:16px; padding-right:16px; }
   .hero{ padding:48px 0 4px; }
+  .hero h1{ font-size:clamp(44px,15vw,68px); }
+  .section-head{ flex-wrap:wrap; }
   .statstrip{ flex-wrap:wrap; }
   .statstrip .stat{ flex:1 1 33%; min-width:0; border-top:1px solid var(--border); }
   .statstrip .stat:nth-child(-n+3){ border-top:0; }
