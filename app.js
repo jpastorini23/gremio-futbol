@@ -159,8 +159,16 @@ function renderSpotlights(stats){
 }
 
 function renderHeroNote(){
-  document.getElementById('hero-note').innerHTML =
-    `<span class="star">★</span> Figura del torneo <em>para los que saben de fútbol</em>: ${av('Juancho', 'xs')} <b>Juancho</b>`;
+  document.getElementById('hero-note').innerHTML = `
+    <div class="legend-card">
+      <div class="legend-glow"></div>
+      ${av('Juancho', 'xl')}
+      <div class="legend-meta">
+        <div class="legend-role">★ Figura del torneo <em>para los que saben de fútbol</em></div>
+        <div class="legend-who">Juancho</div>
+        <div class="legend-sub">El crack que las estadísticas no entienden</div>
+      </div>
+    </div>`;
 }
 
 function renderCountdowns(data){
