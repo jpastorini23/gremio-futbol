@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>El Gremio Fútbol — Dashboard</title>
+  <title>El Gremio Fútbol · Temporada 2026</title>
   <meta name="description" content="Liga interna del gremio. Resultados, MVPs y goleadores fecha por fecha.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9A%BD</text></svg>">
 
@@ -20,114 +20,129 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="hero" id="hero">
-    <div class="hero-content">
-      <div class="hero-top">
-        <div class="hero-spotlight" id="spotlight-mvp"></div>
-        <div class="hero-title-wrap">
-          <span class="hero-eyebrow">Temporada 2026</span>
-          <h1 class="hero-title">El Gremio <span class="accent">Fútbol</span></h1>
-          <p class="hero-sub">Liga interna · Jueves cada 15 días</p>
-        </div>
-        <div class="hero-spotlight" id="spotlight-goleador"></div>
+
+  <!-- floating music player -->
+  <div class="player-pill" id="player-pill">
+    <button class="pp-btn" id="pp-btn" aria-label="Play/Pausa"></button>
+    <div class="pp-meta"><span class="t">Magalenha</span><span class="a">Sérgio Mendes</span></div>
+    <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="yt-host"><div id="yt-mount"></div></div>
+
+  <div class="wrap">
+
+    <!-- ============ HERO ============ -->
+    <header class="hero">
+      <span class="badge">Temporada 2026</span>
+      <h1>El Gremio <em>Fútbol</em></h1>
+      <p class="hero-sub">Liga interna · Jueves cada 15 días · Claros vs Oscuros</p>
+
+      <div class="statstrip" data-rise id="statstrip"></div>
+    </header>
+
+    <!-- ============ DESTACADOS ============ -->
+    <section class="section" style="margin-top:32px;">
+      <div class="spotlights">
+        <article class="spot" id="spot-fig" data-rise style="--i:0"></article>
+        <article class="spot gold" id="spot-gol" data-rise style="--i:1"></article>
       </div>
-      <div class="hero-stats" id="hero-stats"></div>
-      <div class="hero-note" id="hero-note"></div>
-    </div>
-  </header>
+      <p class="footnote" id="hero-note"></p>
+    </section>
 
-  <aside class="music-corner" id="music-corner">
-    <div class="music-popover" id="music-popover">
-      <div class="music-header">
-        <span class="music-label">🎵 Tema del gremio</span>
-        <button class="music-close" id="music-close" aria-label="Minimizar">−</button>
+    <!-- ============ COUNTDOWNS ============ -->
+    <section class="section">
+      <div class="countdowns" id="countdowns"></div>
+    </section>
+
+    <!-- ============ OPINIONES ============ -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">La tribuna</p>
+          <h2 class="section-title">Lo que opina la gente</h2>
+        </div>
       </div>
-      <div class="music-track">
-        <div class="music-art">
-          <img src="https://i.ytimg.com/vi/ijnujobdJ4c/mqdefault.jpg" alt="">
+      <div class="opinions" id="opinions"></div>
+    </section>
+
+    <!-- ============ GALERÍA ============ -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">El álbum</p>
+          <h2 class="section-title">Galería</h2>
         </div>
-        <div class="music-info">
-          <div class="music-title">Magalenha</div>
-          <div class="music-artist">Sérgio Mendes</div>
-        </div>
-        <button class="music-play" id="music-play" aria-label="Reproducir">▶</button>
+        <span class="section-sub">Deslizá ←→</span>
       </div>
-    </div>
-    <button class="music-trigger" id="music-trigger" aria-label="Mostrar música">🎵</button>
-    <div class="music-yt-host"><div id="music-yt-mount"></div></div>
-  </aside>
+      <div class="gallery" id="gallery"></div>
+    </section>
 
-  <section class="next-match" id="next-match"></section>
-
-  <section class="highlights" id="highlights"></section>
-
-  <section class="gallery-section reveal">
-    <div class="gallery-head">
-      <h2 class="section-title">Galería</h2>
-      <span class="gallery-hint">Deslizá ←→</span>
-    </div>
-    <div class="gallery-strip" id="gallery-strip"></div>
-  </section>
-
-  <main class="container">
-    <h2 class="section-title">Los que la vienen rompiendo</h2>
-    <section class="podiums">
-      <div class="podium-card">
-        <div class="podium-header">
-          <span class="podium-icon">★</span>
-          <h2>Más MVPs</h2>
+    <!-- ============ PODIOS ============ -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">El ranking</p>
+          <h2 class="section-title">Los que la vienen rompiendo</h2>
         </div>
-        <ol class="podium-list" id="top-mvps"></ol>
       </div>
-
-      <div class="podium-card">
-        <div class="podium-header">
-          <span class="podium-icon">⚽</span>
-          <h2>Más veces goleador</h2>
+      <div class="podiums">
+        <div class="podium" data-rise style="--i:0">
+          <h3><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16 14 18 21 12 17 6 21 8 14 2 9 9 9"/></svg>Más MVPs</h3>
+          <div id="pod-mvp"></div>
         </div>
-        <ol class="podium-list" id="top-goleadores"></ol>
-      </div>
-
-      <div class="podium-card">
-        <div class="podium-header">
-          <span class="podium-icon">🏆</span>
-          <h2>% de puntos obtenidos</h2>
+        <div class="podium" data-rise style="--i:1">
+          <h3><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>Más veces goleador</h3>
+          <div id="pod-gol"></div>
         </div>
-        <ol class="podium-list" id="top-winrate"></ol>
-        <p class="podium-foot">Mínimo 2 partidos jugados</p>
+        <div class="podium" data-rise style="--i:2">
+          <h3><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>% de puntos obtenidos</h3>
+          <div id="pod-pts"></div>
+          <div class="foot">Mínimo 2 partidos jugados</div>
+        </div>
       </div>
     </section>
 
-    <section class="matches-section">
-      <h2 class="section-title">Historial de partidos</h2>
-      <div class="matches-grid" id="matches-grid"></div>
-    </section>
-
-    <section class="filter-card">
-      <div class="filter-header">
-        <h2>Stats por jugador</h2>
-        <select id="player-filter" class="player-select"></select>
+    <!-- ============ HISTORIAL ============ -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">El registro</p>
+          <h2 class="section-title">Historial de partidos</h2>
+        </div>
       </div>
-      <div class="player-hero" id="player-hero"></div>
-      <div class="player-stats" id="player-stats"></div>
-      <div class="player-history" id="player-history"></div>
+      <div class="matches" id="matches"></div>
     </section>
-  </main>
 
-  <footer class="site-footer">
-    <p>El Gremio Fútbol · Actualizado por Juan</p>
-  </footer>
+    <!-- ============ STATS POR JUGADOR ============ -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">La ficha</p>
+          <h2 class="section-title">Stats por jugador</h2>
+        </div>
+        <div class="selectwrap">
+          <select id="player-select" aria-label="Elegí un jugador">
+            <option value="">Elegí un jugador…</option>
+          </select>
+        </div>
+      </div>
+      <div class="player-panel" id="player-panel"></div>
+    </section>
 
-  <div class="lightbox" id="lightbox" hidden>
-    <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar">×</button>
-    <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Anterior">‹</button>
-    <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Siguiente">›</button>
-    <img class="lightbox-img" id="lightbox-img" alt="">
-    <div class="lightbox-counter" id="lightbox-counter"></div>
+    <footer class="foot">El Gremio Fútbol · hecho con cariño y cargadas · 2026</footer>
+  </div>
+
+  <!-- lightbox -->
+  <div class="lb" id="lb">
+    <button class="lb-close" id="lb-close" aria-label="Cerrar">×</button>
+    <button class="lb-nav lb-prev" id="lb-prev" aria-label="Anterior">‹</button>
+    <button class="lb-nav lb-next" id="lb-next" aria-label="Siguiente">›</button>
+    <div class="lb-counter" id="lb-counter"></div>
+    <div class="lb-card" id="lb-card"><img id="lb-img" alt=""><div class="cap" id="lb-cap"></div></div>
   </div>
 
   <script src="app.js"></script>

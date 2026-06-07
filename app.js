@@ -1,758 +1,574 @@
-async function loadData() {
+/* ============================================================
+   El Gremio Fútbol — Rediseño · data real + render + interacciones
+   ============================================================ */
+
+/* ---------- helpers ---------- */
+function initials(name){
+  const parts = (name || '').trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (name || '').slice(0, 2).toUpperCase();
+}
+function avColor(name){
+  let h = 0; for (const c of name) h = (h*31 + c.charCodeAt(0)) % 360;
+  return `linear-gradient(135deg, hsl(${h} 42% 38%), hsl(${(h+40)%360} 46% 24%))`;
+}
+function av(name, size){
+  const onerror = `onerror="this.remove()"`;
+  const onload = `onload="this.parentElement.classList.add('is-clickable')"`;
+  return `<span class="av" data-size="${size}" data-name="${name}" style="background:${avColor(name)}" title="${name}">${initials(name)}<img src="img/${name}.png" alt="" ${onload} ${onerror}></span>`;
+}
+function el(html){
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+function formatShort(iso){
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' });
+}
+function formatLong(d){
+  const s = d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/* ---------- data ---------- */
+let DATA = null;
+let STATS = null;
+
+async function loadData(){
   const res = await fetch('data.json?t=' + Date.now());
   if (!res.ok) throw new Error('No pude cargar data.json');
   return res.json();
 }
 
-function initials(name) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-}
-
-function avatarColor(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  const hue = Math.abs(hash) % 360;
-  return `hsl(${hue}, 45%, 32%)`;
-}
-
-function avatar(name, size = 'sm') {
-  const color = avatarColor(name);
-  const fallback = `onerror="if(this.dataset.tried){this.remove()}else{this.dataset.tried=1;this.src='img/${name}.png'}"`;
-  const success = `onload="this.parentElement.classList.add('avatar-clickable')"`;
-  return `<span class="avatar avatar-${size}" data-initials="${initials(name)}" data-name="${name}" style="background:${color}"><img src="img/${name}.jpg" alt="" ${fallback} ${success}></span>`;
-}
-
-function formatDate(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  return d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: '2-digit' });
-}
-
-function formatLongDate(d) {
-  return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
-}
-
-function computeNextMatch(data) {
-  if (!data.matches.length) return null;
-  const lastIso = [...data.matches].map(m => m.date).sort().pop();
-  const next = new Date(lastIso + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  next.setDate(next.getDate() + 14);
-  while (next < today) next.setDate(next.getDate() + 14);
-  const diffDays = Math.round((next - today) / (1000 * 60 * 60 * 24));
-  return { date: next, diffDays };
-}
-
-function generateHighlights(data) {
-  const facts = [];
-  if (Array.isArray(data.manualHighlights)) {
-    for (const m of data.manualHighlights) {
-      facts.push({
-        kind: 'manual-' + (m.title || m.player || ''),
-        icon: m.icon || '✨',
-        accent: m.accent || 'gold',
-        title: m.title || '',
-        player: m.player || '',
-        text: m.text || ''
-      });
-    }
-  }
-  return facts;
-}
-
-const highlightsState = {
-  facts: [],
-  index: 0,
-  expanded: false,
-  intervalId: null
-};
-
-function factCardHtml(f, large) {
-  return `
-    <div class="fact-card fact-${f.accent} ${large ? 'fact-card-large' : ''}">
-      <div class="fact-icon">${f.icon}</div>
-      <div class="fact-body">
-        <span class="fact-title">${f.title}</span>
-        <div class="fact-player-row">
-          ${avatar(f.player, large ? 'md' : 'sm')}
-          <span class="fact-player">${f.player}</span>
-        </div>
-        <span class="fact-text">${f.text}</span>
-      </div>
-    </div>
-  `;
-}
-
-function renderHighlights(data, stats) {
-  const el = document.getElementById('highlights');
-  const facts = generateHighlights(data, stats);
-  if (!facts.length) { el.innerHTML = ''; return; }
-
-  highlightsState.facts = facts;
-  if (highlightsState.index >= facts.length) highlightsState.index = 0;
-
-  el.innerHTML = `
-    <div class="highlights-head">
-      <h2 class="section-title highlights-title">Lo que opina la gente</h2>
-      <button class="highlights-toggle" id="highlights-toggle">${highlightsState.expanded ? 'Ver una' : `Ver todas (${facts.length})`}</button>
-    </div>
-    <div class="highlights-content" id="highlights-content"></div>
-  `;
-  renderHighlightsContent();
-  if (!highlightsState.expanded) startHighlightsRotation();
-}
-
-function renderHighlightsContent() {
-  const content = document.getElementById('highlights-content');
-  if (!content) return;
-  const facts = highlightsState.facts;
-  if (highlightsState.expanded) {
-    stopHighlightsRotation();
-    content.innerHTML = `<div class="highlights-grid">${facts.map(f => factCardHtml(f, false)).join('')}</div>`;
-  } else {
-    const f = facts[highlightsState.index];
-    content.innerHTML = `
-      <div class="highlights-single" key="${highlightsState.index}">
-        ${factCardHtml(f, true)}
-        <div class="highlights-dots">
-          ${facts.map((_, i) => `<button class="hl-dot ${i === highlightsState.index ? 'active' : ''}" data-dot="${i}" aria-label="Ir a ${i + 1}"></button>`).join('')}
-        </div>
-      </div>
-    `;
-  }
-}
-
-function startHighlightsRotation() {
-  stopHighlightsRotation();
-  if (highlightsState.facts.length <= 1) return;
-  highlightsState.intervalId = setInterval(() => {
-    highlightsState.index = (highlightsState.index + 1) % highlightsState.facts.length;
-    renderHighlightsContent();
-  }, 5000);
-}
-
-function stopHighlightsRotation() {
-  if (highlightsState.intervalId) {
-    clearInterval(highlightsState.intervalId);
-    highlightsState.intervalId = null;
-  }
-}
-
-function countdownHtml(diffDays) {
-  if (diffDays === 0) return '<span class="countdown-value">HOY</span>';
-  if (diffDays === 1) return '<span class="countdown-value">1</span><span class="countdown-unit">día</span>';
-  return `<span class="countdown-value">${diffDays}</span><span class="countdown-unit">días</span>`;
-}
-
-function countdownCardHtml({ label, dateText, subtitle, diffDays, accent }) {
-  return `
-    <div class="next-match-card countdown-${accent || 'green'}">
-      <div class="next-match-pulse"></div>
-      <div class="next-match-info">
-        <span class="next-match-label">${label}</span>
-        <span class="next-match-date">${dateText}</span>
-        ${subtitle ? `<span class="next-match-sub">${subtitle}</span>` : ''}
-      </div>
-      <div class="next-match-countdown">${countdownHtml(diffDays)}</div>
-    </div>
-  `;
-}
-
-function diffFromToday(iso) {
-  const date = new Date(iso + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return { date, diffDays: Math.round((date - today) / (1000 * 60 * 60 * 24)) };
-}
-
-function renderNextMatch(data) {
-  const el = document.getElementById('next-match');
-  const cards = [];
-
-  const next = computeNextMatch(data);
-  if (next) {
-    const dateStr = formatLongDate(next.date);
-    cards.push(countdownCardHtml({
-      label: 'Próximo partido',
-      dateText: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
-      diffDays: next.diffDays,
-      accent: 'green'
-    }));
-  }
-
-  if (Array.isArray(data.events)) {
-    for (const ev of data.events) {
-      const { date, diffDays } = diffFromToday(ev.date);
-      if (diffDays < 0) continue;
-      const dateStr = formatLongDate(date);
-      cards.push(countdownCardHtml({
-        label: ev.label,
-        dateText: dateStr.charAt(0).toUpperCase() + dateStr.slice(1),
-        subtitle: ev.subtitle,
-        diffDays,
-        accent: ev.accent || 'gold'
-      }));
-    }
-  }
-
-  el.innerHTML = cards.length ? `<div class="countdown-grid">${cards.join('')}</div>` : '';
-}
-
-function computePlayerStats(data) {
+function computePlayerStats(data){
   const regulars = new Set(data.players);
   const allNames = new Set(data.players);
-  for (const m of data.matches) {
+  for (const m of data.matches){
     [...m.claros, ...m.oscuros].forEach(p => allNames.add(p));
     if (m.mvp) allNames.add(m.mvp);
     if (m.goleador) allNames.add(m.goleador);
   }
 
   const stats = {};
-  for (const p of allNames) {
+  for (const p of allNames){
     stats[p] = {
-      name: p,
-      isGuest: !regulars.has(p),
-      played: 0,
-      wins: 0,
-      losses: 0,
-      draws: 0,
-      mvps: 0,
-      lastMvpDate: '',
-      goleadorCount: 0,
-      lastGoleadorDate: '',
+      name: p, isGuest: !regulars.has(p),
+      played: 0, wins: 0, losses: 0, draws: 0,
+      mvps: 0, lastMvpDate: '',
+      goleadorCount: 0, lastGoleadorDate: '',
       matches: []
     };
   }
 
-  for (const m of data.matches) {
+  for (const m of data.matches){
     const all = [...m.claros.map(p => ['claros', p]), ...m.oscuros.map(p => ['oscuros', p])];
-
-    for (const [team, p] of all) {
+    for (const [team, p] of all){
       if (!stats[p]) continue;
       const outcome = m.winner === 'draw' ? 'draw' : (m.winner === team ? 'win' : 'loss');
-
       stats[p].played++;
       if (outcome === 'win') stats[p].wins++;
       else if (outcome === 'loss') stats[p].losses++;
       else stats[p].draws++;
-
-      if (m.mvp === p) {
-        stats[p].mvps++;
-        if (m.date > stats[p].lastMvpDate) stats[p].lastMvpDate = m.date;
-      }
-      if (m.goleador === p) {
-        stats[p].goleadorCount++;
-        if (m.date > stats[p].lastGoleadorDate) stats[p].lastGoleadorDate = m.date;
-      }
-
-      stats[p].matches.push({
-        date: m.date,
-        team,
-        outcome,
-        mvp: m.mvp === p,
-        goleador: m.goleador === p
-      });
+      if (m.mvp === p){ stats[p].mvps++; if (m.date > stats[p].lastMvpDate) stats[p].lastMvpDate = m.date; }
+      if (m.goleador === p){ stats[p].goleadorCount++; if (m.date > stats[p].lastGoleadorDate) stats[p].lastGoleadorDate = m.date; }
+      stats[p].matches.push({ date: m.date, team, outcome, mvp: m.mvp === p, goleador: m.goleador === p });
     }
   }
-
   return stats;
 }
 
-function renderHeroStats(data) {
-  const total = data.matches.length;
-  const clarosWins = data.matches.filter(m => m.winner === 'claros').length;
-  const oscurosWins = data.matches.filter(m => m.winner === 'oscuros').length;
-  const draws = data.matches.filter(m => m.winner === 'draw').length;
-  const players = data.players.length;
-
-  const stats = [
-    { value: total, label: 'Partidos' },
-    { value: clarosWins, label: 'Wins Claros' },
-    { value: oscurosWins, label: 'Wins Oscuros' },
-    { value: draws, label: 'Empates' },
-    { value: players, label: 'Jugadores' },
-  ];
-
-  document.getElementById('hero-stats').innerHTML = stats.map(s => `
-    <div class="hero-stat"><div class="hero-stat-value" data-target="${s.value}">0</div><div class="hero-stat-label">${s.label}</div></div>
-  `).join('');
-
-  document.querySelectorAll('.hero-stat-value').forEach(el => animateNumber(el, +el.dataset.target));
-}
-
-function computeStreak(matches) {
-  if (!matches.length) return { type: 'none', count: 0, icon: '', label: 'Sin partidos' };
+function computeStreak(matches){
+  if (!matches.length) return { type: 'none', count: 0, emoji: '', label: 'Sin partidos' };
   const sorted = [...matches].sort((a, b) => b.date.localeCompare(a.date));
   const recent = sorted[0].outcome;
   let count = 0;
-  for (const m of sorted) {
-    if (m.outcome === recent) count++;
-    else break;
-  }
+  for (const m of sorted){ if (m.outcome === recent) count++; else break; }
   const meta = {
-    win: { icon: '🔥', label: count === 1 ? 'Ganó último' : 'Racha ganadora' },
-    loss: { icon: '❄️', label: count === 1 ? 'Perdió último' : 'Racha perdedora' },
-    draw: { icon: '🤝', label: count === 1 ? 'Empató último' : 'Racha de empates' },
-  }[recent] || { icon: '', label: 'Sin racha' };
-  return { type: recent, count, icon: meta.icon + ' ', label: meta.label };
+    win:  { emoji: '🔥', label: count === 1 ? 'Ganó último' : 'Racha ganadora' },
+    loss: { emoji: '❄️', label: count === 1 ? 'Perdió último' : 'Racha perdedora' },
+    draw: { emoji: '🤝', label: count === 1 ? 'Empató último' : 'Racha de empates' },
+  }[recent] || { emoji: '', label: 'Sin racha' };
+  return { type: recent, count, emoji: meta.emoji, label: meta.label };
 }
 
-function animateNumber(el, target, duration = 900) {
-  const start = performance.now();
-  function step(now) {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = Math.round(target * eased);
-    if (t < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+function computeNextMatch(data){
+  if (!data.matches.length) return null;
+  const lastIso = [...data.matches].map(m => m.date).sort().pop();
+  const next = new Date(lastIso + 'T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  next.setDate(next.getDate() + 14);
+  while (next < today) next.setDate(next.getDate() + 14);
+  const diffDays = Math.round((next - today) / 86400000);
+  return { date: next, diffDays };
 }
 
-function renderGallery(data) {
-  const strip = document.getElementById('gallery-strip');
-  const all = [];
-  const sorted = [...data.matches].sort((a, b) => b.date.localeCompare(a.date));
-  for (const m of sorted) {
-    if (!Array.isArray(m.photos)) continue;
-    for (const photo of m.photos) {
-      all.push({ photo, date: m.date, stadium: m.stadium || '' });
-    }
-  }
-
-  if (!all.length) {
-    strip.innerHTML = '<div class="empty">Sin fotos todavía</div>';
-    return;
-  }
-
-  strip.dataset.photos = JSON.stringify(all.map(a => a.photo));
-  strip.innerHTML = all.map((p, i) => `
-    <button class="gallery-item" data-index="${i}" aria-label="Abrir foto">
-      <img src="${p.photo}" alt="" loading="lazy">
-      <span class="gallery-item-label">${formatDate(p.date)}${p.stadium ? ' · ' + p.stadium : ''}</span>
-    </button>
-  `).join('');
+function diffFromToday(iso){
+  const date = new Date(iso + 'T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return { date, diffDays: Math.round((date - today) / 86400000) };
 }
 
-function renderHeroNote() {
-  document.getElementById('hero-note').innerHTML = `
-    <span>★ Figura del torneo <em>para los que saben de fútbol</em>:</span>
-    ${avatar('Juancho', 'md')}
-    <strong>Juancho</strong>
-  `;
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderStatstrip(data){
+  const total = data.matches.length;
+  const cw = data.matches.filter(m => m.winner === 'claros').length;
+  const ow = data.matches.filter(m => m.winner === 'oscuros').length;
+  const dr = data.matches.filter(m => m.winner === 'draw').length;
+  const pls = data.players.length;
+  const stats = [
+    { v: total, l: 'Partidos' },
+    { v: cw, l: 'Wins Claros' },
+    { v: ow, l: 'Wins Oscuros' },
+    { v: dr, l: 'Empates' },
+    { v: pls, l: 'Jugadores' }
+  ];
+  document.getElementById('statstrip').innerHTML = stats.map(s =>
+    `<div class="stat"><div class="num" data-to="${s.v}">0</div><div class="lbl">${s.l}</div></div>`
+  ).join('');
 }
 
-function renderSpotlights(stats) {
+function renderSpotlights(stats){
   const arr = Object.values(stats).filter(s => !s.isGuest);
 
-  const topMvp = arr
-    .filter(s => s.mvps > 0)
+  const topMvp = arr.filter(s => s.mvps > 0)
     .sort((a, b) => b.mvps - a.mvps || b.lastMvpDate.localeCompare(a.lastMvpDate))[0];
-  const topGoleador = arr
-    .filter(s => s.goleadorCount > 0)
+  const topGol = arr.filter(s => s.goleadorCount > 0)
     .sort((a, b) => b.goleadorCount - a.goleadorCount || b.lastGoleadorDate.localeCompare(a.lastGoleadorDate))[0];
 
-  document.getElementById('spotlight-mvp').innerHTML = renderSpotlight('Figura del torneo', topMvp, topMvp ? `${topMvp.mvps} MVP${topMvp.mvps > 1 ? 's' : ''}` : null);
-  document.getElementById('spotlight-goleador').innerHTML = renderSpotlight('Goleador del torneo', topGoleador, topGoleador ? `${topGoleador.goleadorCount} partido${topGoleador.goleadorCount > 1 ? 's' : ''}` : null);
-}
-
-function renderSpotlight(label, player, sub) {
-  if (!player) {
-    return `
-      <div class="avatar avatar-xl" data-initials="?" style="background:#243029"></div>
-      <span class="spotlight-label">${label}</span>
-      <span class="spotlight-empty">Sin datos</span>
-    `;
+  const figEl = document.getElementById('spot-fig');
+  if (topMvp){
+    const subParts = [`${topMvp.mvps} MVP${topMvp.mvps > 1 ? 's' : ''}`];
+    if (topMvp.losses === 0 && topMvp.played > 0) subParts.push('invicto');
+    figEl.innerHTML = av(topMvp.name, 'lg') +
+      `<div class="meta"><div class="role">★ Figura del torneo</div><div class="who">${topMvp.name}</div><div class="sub">${subParts.join(' · ')}</div></div>`;
+  } else {
+    figEl.innerHTML = `<div class="meta"><div class="role">★ Figura del torneo</div><div class="who">—</div><div class="sub">Todavía sin MVP</div></div>`;
   }
-  return `
-    ${avatar(player.name, 'xl')}
-    <span class="spotlight-label">${label}</span>
-    <span class="spotlight-name">${player.name}</span>
-    <span class="spotlight-label">${sub}</span>
-  `;
+
+  const golEl = document.getElementById('spot-gol');
+  if (topGol){
+    const sub = topGol.goleadorCount === 1 ? 'Goleador en 1 partido' : `Goleador en ${topGol.goleadorCount} partidos`;
+    golEl.innerHTML = av(topGol.name, 'lg') +
+      `<div class="meta"><div class="role">⚽ Goleador del torneo</div><div class="who">${topGol.name}</div><div class="sub">${sub}</div></div>`;
+  } else {
+    golEl.innerHTML = `<div class="meta"><div class="role">⚽ Goleador del torneo</div><div class="who">—</div><div class="sub">Sin goleador del torneo</div></div>`;
+  }
 }
 
-const podiumState = {};
+function renderHeroNote(){
+  document.getElementById('hero-note').innerHTML =
+    `<span class="star">★</span> Figura del torneo <em>para los que saben de fútbol</em>: ${av('Juancho', 'xs')} <b>Juancho</b>`;
+}
 
-function renderPodium(id, items, opts = {}) {
-  podiumState[id] = { items, opts };
-  const el = document.getElementById(id);
-  if (!items.length) {
-    el.innerHTML = '<li class="empty">Sin datos todavía</li>';
+function renderCountdowns(data){
+  const cards = [];
+  const next = computeNextMatch(data);
+  if (next){
+    cards.push(countdownCard({
+      cls: 'green',
+      label: '<span class="live-dot"></span>Próximo partido',
+      date: formatLong(next.date),
+      micro: 'Jueves cada 15 días',
+      diffDays: next.diffDays
+    }));
+  }
+  if (Array.isArray(data.events)){
+    for (const ev of data.events){
+      const info = diffFromToday(ev.date);
+      if (info.diffDays < 0) continue;
+      cards.push(countdownCard({
+        cls: ev.accent === 'gold' ? 'gold' : 'green',
+        label: ev.label,
+        date: formatLong(info.date),
+        micro: ev.subtitle || '',
+        diffDays: info.diffDays
+      }));
+    }
+  }
+  document.getElementById('countdowns').innerHTML = cards.join('');
+}
+function countdownCard({ cls, label, date, micro, diffDays }){
+  const value = diffDays === 0 ? 'HOY' : diffDays;
+  const unit = diffDays === 0 ? '' : `<div class="u">${diffDays === 1 ? 'día' : 'días'}</div>`;
+  return `
+    <div class="count ${cls}" data-rise>
+      <div>
+        <div class="lbl">${label}</div>
+        <div class="date">${date}</div>
+        ${micro ? `<div class="micro">${micro}</div>` : ''}
+      </div>
+      <div class="days"><div class="n">${value}</div>${unit}</div>
+    </div>`;
+}
+
+function renderOpinions(data){
+  const wrap = document.getElementById('opinions');
+  const opinions = Array.isArray(data.manualHighlights) ? data.manualHighlights : [];
+  wrap.innerHTML = '';
+  opinions.forEach((o, i) => {
+    wrap.appendChild(el(`
+      <article class="op" data-rise style="--i:${i % 4}">
+        <div class="op-top"><span class="op-emoji">${o.icon || '✨'}</span><span class="op-title">${o.title || ''}</span></div>
+        <div class="op-who">${av(o.player, 'sm')}<span class="name">${o.player}</span></div>
+        <p class="op-quote">${o.text || ''}</p>
+      </article>`));
+  });
+}
+
+function renderGallery(data){
+  const wrap = document.getElementById('gallery');
+  wrap.innerHTML = '';
+  const items = [];
+  for (const m of [...data.matches].sort((a, b) => b.date.localeCompare(a.date))){
+    if (!Array.isArray(m.photos)) continue;
+    for (const photo of m.photos){
+      items.push({ photo, date: m.date, where: m.stadium || '' });
+    }
+  }
+  if (!items.length){
+    wrap.innerHTML = `<div class="empty" style="margin:0"><span class="em">📸</span>Sin fotos todavía</div>`;
     return;
   }
-  const expanded = !!opts.expanded;
-  const visible = expanded ? items : items.slice(0, 5);
-
-  let html = visible.map((it, i) => `
-    <li class="podium-item rank-${i + 1}">
-      <span class="podium-rank">${i + 1}</span>
-      ${avatar(it.name, 'sm')}
-      <span class="podium-name">${it.name}${it.isGuest ? ' <span class="guest-tag">inv</span>' : ''}</span>
-      <span class="podium-value">${it.value}${it.sub ? `<span class="podium-sub">${it.sub}</span>` : ''}</span>
-    </li>
-  `).join('');
-
-  if (opts.expandable && items.length > 5) {
-    html += `<li class="podium-expand">
-      <button class="podium-expand-btn" data-target="${id}">
-        ${expanded ? '▲ Ver menos' : `▼ Ver todos (${items.length})`}
-      </button>
-    </li>`;
-  }
-  el.innerHTML = html;
+  galleryPhotos = items.map(i => ({ url: i.photo, caption: `${formatShort(i.date)}${i.where ? ' · ' + i.where : ''}` }));
+  items.forEach((it, i) => {
+    wrap.appendChild(el(`
+      <button class="shot" data-gallery-idx="${i}" aria-label="Abrir foto">
+        <div class="ph" style="background-image:url('${it.photo}')"></div>
+        <span class="cap">${formatShort(it.date)}<br><span class="where">📍 ${it.where || 'Sin sede'}</span></span>
+      </button>`));
+  });
 }
 
-function togglePodium(id) {
-  const state = podiumState[id];
-  if (!state) return;
-  state.opts.expanded = !state.opts.expanded;
-  renderPodium(id, state.items, state.opts);
+function podiumRows(list, kind){
+  if (!list.length) return '';
+  const medals = ['g', 's', 'b'];
+  return list.map((r, i) => {
+    const rk = i < 3 ? medals[i] : 'n';
+    const val = kind === 'pts'
+      ? `<div class="pval ppct">${r.value}%<span class="pj">${r.pj} PJ</span></div>`
+      : `<div class="pval">${r.value}</div>`;
+    return `<div class="prow"><span class="rank ${rk}">${i + 1}</span>${av(r.name, 'sm')}<span class="pname">${r.name}${r.isGuest ? ' <span class="guest-tag">inv</span>' : ''}</span>${val}</div>`;
+  }).join('');
 }
 
-function renderPodiums(stats) {
+function renderPodiums(stats){
   const arr = Object.values(stats);
 
-  const mvps = arr
-    .filter(s => s.mvps > 0)
+  const mvps = arr.filter(s => s.mvps > 0)
     .sort((a, b) => b.mvps - a.mvps)
     .slice(0, 5)
     .map(s => ({ name: s.name, value: s.mvps, isGuest: s.isGuest }));
-  renderPodium('top-mvps', mvps);
+  const mvpEl = document.getElementById('pod-mvp');
+  mvpEl.innerHTML = mvps.length
+    ? podiumRows(mvps, 'n')
+    : `<div class="empty"><span class="em">★</span>Todavía sin MVPs</div>`;
 
-  const goleadores = arr
-    .filter(s => s.goleadorCount > 0)
+  const gols = arr.filter(s => s.goleadorCount > 0)
     .sort((a, b) => b.goleadorCount - a.goleadorCount)
     .slice(0, 5)
     .map(s => ({ name: s.name, value: s.goleadorCount, isGuest: s.isGuest }));
-  renderPodium('top-goleadores', goleadores);
+  const golEl = document.getElementById('pod-gol');
+  if (!gols.length){
+    golEl.innerHTML = `<div class="empty"><span class="em">⚽</span>Sin goleadores cargados</div>`;
+  } else if (gols.length === 1){
+    golEl.innerHTML = podiumRows(gols, 'n') +
+      `<div class="empty"><span class="em">⚽</span>Todavía nadie repitió como goleador</div>`;
+  } else {
+    golEl.innerHTML = podiumRows(gols, 'n');
+  }
 
-  const pointsPct = arr
-    .filter(s => s.played >= 2)
+  const pts = arr.filter(s => s.played >= 2)
     .map(s => {
       const points = s.wins * 3 + s.draws;
       const max = s.played * 3;
       const pct = max ? Math.round((points / max) * 100) : 0;
-      return { name: s.name, value: pct, isGuest: s.isGuest, played: s.played, points, max };
+      return { name: s.name, value: pct, pj: s.played, isGuest: s.isGuest };
     })
-    .sort((a, b) => b.value - a.value || b.played - a.played)
-    .map(s => ({
-      name: s.name,
-      value: s.value + '%',
-      sub: `${s.played} PJ`,
-      isGuest: s.isGuest
-    }));
-  renderPodium('top-winrate', pointsPct, { expandable: true });
+    .sort((a, b) => b.value - a.value || b.pj - a.pj)
+    .slice(0, 5);
+  const ptsEl = document.getElementById('pod-pts');
+  ptsEl.innerHTML = pts.length
+    ? podiumRows(pts, 'pts')
+    : `<div class="empty"><span class="em">🏆</span>Faltan partidos para calcular</div>`;
 }
 
-function renderPlayerFilter(data, stats) {
-  const select = document.getElementById('player-filter');
-  const sorted = Object.values(stats).sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  select.innerHTML = '<option value="">Elegí un jugador…</option>' + sorted.map(s =>
-    `<option value="${s.name}">${s.name}${s.isGuest ? ' (invitado)' : ''}</option>`
-  ).join('');
-
-  const update = () => renderPlayerView(stats[select.value]);
-  select.addEventListener('change', update);
-  update();
-}
-
-function renderPlayerView(s) {
-  const heroEl = document.getElementById('player-hero');
-  const statsEl = document.getElementById('player-stats');
-  const historyEl = document.getElementById('player-history');
-
-  if (!s) {
-    heroEl.innerHTML = '<div class="player-prompt">Elegí un jugador del menú para ver sus stats y su historial partido a partido.</div>';
-    statsEl.innerHTML = '';
-    historyEl.innerHTML = '';
+function renderMatches(data){
+  const wrap = document.getElementById('matches');
+  wrap.innerHTML = '';
+  const matches = [...data.matches].sort((a, b) => b.date.localeCompare(a.date));
+  if (!matches.length){
+    wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><span class="em">⚽</span>Todavía no se cargaron partidos.</div>`;
     return;
   }
+  matches.forEach(m => {
+    const team = (arr, kind, isGuestFn) => `
+      <div class="team ${kind === 'oscuros' ? 'oscuros-team' : ''}">
+        <div class="tlbl ${kind}"><span class="dot"></span>${kind}</div>
+        ${arr.map(p => `<div class="player">${av(p, 'xs')}<span>${p}</span>${isGuestFn(p) ? '<span class="guest-tag">inv</span>' : ''}</div>`).join('')}
+      </div>`;
+    const isGuest = p => STATS[p] && STATS[p].isGuest;
 
-  heroEl.innerHTML = `
-    ${avatar(s.name, 'lg')}
-    <div class="player-hero-info">
-      <h3>${s.name}${s.isGuest ? ' <span class="guest-tag">invitado</span>' : ''}</h3>
-      <p>${s.played === 0 ? 'Sin partidos jugados' : `${s.played} ${s.played === 1 ? 'partido jugado' : 'partidos jugados'}`}</p>
-    </div>
-  `;
+    const resultText = m.winner === 'claros' ? 'Ganó Claros'
+                     : m.winner === 'oscuros' ? 'Ganó Oscuros'
+                     : 'Empate';
+    const resultCls = m.winner === 'draw' ? 'draw' : 'win';
 
-  if (s.played === 0) {
-    statsEl.innerHTML = '<div class="empty" style="grid-column:1/-1">Este jugador todavía no jugó ningún partido.</div>';
-    historyEl.innerHTML = '';
-    return;
-  }
-
-  const points = s.wins * 3 + s.draws;
-  const maxPoints = s.played * 3;
-  const pointsPct = maxPoints ? Math.round((points / maxPoints) * 100) : 0;
-  const streak = computeStreak(s.matches);
-
-  statsEl.innerHTML = `
-    <div class="stat-tile"><div class="stat-tile-value">${s.played}</div><div class="stat-tile-label">Partidos</div></div>
-    <div class="stat-tile"><div class="stat-tile-value">${s.wins}-${s.draws}-${s.losses}</div><div class="stat-tile-label">G - E - P</div></div>
-    <div class="stat-tile"><div class="stat-tile-value">${pointsPct}%</div><div class="stat-tile-label">% Puntos (${points}/${maxPoints})</div></div>
-    <div class="stat-tile streak-${streak.type}"><div class="stat-tile-value">${streak.icon}${streak.count}</div><div class="stat-tile-label">${streak.label}</div></div>
-    <div class="stat-tile"><div class="stat-tile-value">${s.mvps}</div><div class="stat-tile-label">MVPs</div></div>
-    <div class="stat-tile"><div class="stat-tile-value">${s.goleadorCount}</div><div class="stat-tile-label">Goleador</div></div>
-  `;
-
-  const sorted = [...s.matches].sort((a, b) => b.date.localeCompare(a.date));
-  historyEl.innerHTML = `
-    <div class="history-title">Partido a partido</div>
-    ${sorted.map(m => `
-      <div class="history-row">
-        <span class="history-date">${formatDate(m.date)}</span>
-        <span class="history-team team-${m.team}">${m.team === 'claros' ? 'Claros' : 'Oscuros'}</span>
-        <span class="history-result ${m.outcome}">${m.outcome === 'win' ? 'Ganó' : m.outcome === 'loss' ? 'Perdió' : 'Empate'}</span>
-        <span class="history-badge">
-          ${m.goleador ? `<span class="badge goleador">Goleador</span>` : ''}
-          ${m.mvp ? `<span class="badge mvp">MVP</span>` : ''}
-        </span>
-      </div>
-    `).join('')}
-  `;
-}
-
-function renderMatches(data) {
-  const grid = document.getElementById('matches-grid');
-  const sorted = [...data.matches].sort((a, b) => b.date.localeCompare(a.date));
-
-  if (!sorted.length) {
-    grid.innerHTML = '<div class="empty">Todavía no se cargaron partidos.</div>';
-    return;
-  }
-
-  grid.innerHTML = sorted.map(m => {
-    const badgeText = m.winner === 'draw' ? 'Empate' : `Ganó ${m.winner === 'claros' ? 'Claros' : 'Oscuros'}`;
-
-    const renderRoster = team => `
-      <div class="roster">
-        <div class="roster-header">${m.winner === team ? '<span class="winner-dot"></span>' : ''}${team === 'claros' ? 'Claros' : 'Oscuros'}</div>
-        <ul class="roster-list">
-          ${m[team].map(p => `<li class="roster-player">
-            <span class="roster-name">${avatar(p, 'xs')}<span>${p}</span></span>
-          </li>`).join('')}
-        </ul>
-      </div>
-    `;
+    const gol = m.goleador
+      ? `<div class="award gol">${av(m.goleador, 'sm')}<div><div class="k">Goleador</div><div class="v">${m.goleador}</div></div></div>`
+      : `<div class="award empty-award">Sin goleador · fue empate</div>`;
+    const mvp = m.mvp
+      ? `<div class="award mvp">${av(m.mvp, 'sm')}<div><div class="k">MVP</div><div class="v">${m.mvp}</div></div></div>`
+      : '';
 
     const photos = Array.isArray(m.photos) ? m.photos : [];
-    const photosHtml = photos.length ? `
-      <div class="match-photos" data-photos='${JSON.stringify(photos).replace(/'/g, '&#39;')}'>
-        ${photos.map((src, i) => `<img class="match-thumb" src="${src}" alt="" data-index="${i}">`).join('')}
-      </div>
-    ` : '';
+    const matchPhotosKey = m.date;
+    matchPhotos[matchPhotosKey] = photos.map(url => ({ url, caption: `${formatShort(m.date)}${m.stadium ? ' · ' + m.stadium : ''}` }));
+    const shots = photos.length
+      ? `<div class="match-shots">${photos.map((url, i) => `<button class="ph" data-match-photos="${matchPhotosKey}" data-match-photo-idx="${i}" aria-label="Ver foto" style="background-image:url('${url}')"></button>`).join('')}</div>`
+      : '';
 
-    return `
-      <div class="match-card">
+    wrap.appendChild(el(`
+      <article class="match" data-rise>
         <div class="match-head">
-          <div class="match-meta">
-            <span class="match-date">${formatDate(m.date)}</span>
-            ${m.stadium ? `<span class="match-stadium">📍 ${m.stadium} Stadium</span>` : ''}
+          <div>
+            <div class="dt">${formatShort(m.date)}</div>
+            <div class="venue">📍 ${m.stadium || 'Sin sede'} ${m.stadium ? 'Stadium' : ''}</div>
           </div>
-          <span class="match-result-badge ${m.winner}">${badgeText}</span>
+          <span class="result ${resultCls}">${resultText}</span>
         </div>
-        <div class="match-rosters">
-          ${renderRoster('claros')}
-          ${renderRoster('oscuros')}
-        </div>
-        <div class="match-highlights">
-          ${m.goleador ? `
-            <div class="highlight-block goleador">
-              ${avatar(m.goleador, 'md')}
-              <div class="mvp-info">
-                <span class="highlight-label">Goleador</span>
-                <span class="highlight-name">${m.goleador}</span>
-              </div>
-            </div>
-          ` : '<div></div>'}
-          ${m.mvp ? `
-            <div class="highlight-block mvp">
-              ${avatar(m.mvp, 'md')}
-              <div class="mvp-info">
-                <span class="highlight-label">MVP</span>
-                <span class="highlight-name">${m.mvp}</span>
-              </div>
-            </div>
-          ` : '<div></div>'}
-        </div>
-        ${photosHtml}
-      </div>
-    `;
-  }).join('');
+        <div class="teams">${team(m.claros, 'claros', isGuest)}${team(m.oscuros, 'oscuros', isGuest)}</div>
+        <div class="awards">${gol}${mvp}</div>
+        ${shots}
+      </article>`));
+  });
 }
 
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
-const lightboxCounter = document.getElementById('lightbox-counter');
-const lightboxPrev = document.getElementById('lightbox-prev');
-const lightboxNext = document.getElementById('lightbox-next');
-let lightboxGallery = [];
-let lightboxIndex = 0;
-
-function showLightboxAt(idx) {
-  lightboxIndex = (idx + lightboxGallery.length) % lightboxGallery.length;
-  lightboxImg.src = lightboxGallery[lightboxIndex];
-  lightboxCounter.textContent = lightboxGallery.length > 1 ? `${lightboxIndex + 1} / ${lightboxGallery.length}` : '';
+/* ---------- player panel ---------- */
+function renderPlayerSelect(data, stats){
+  const sel = document.getElementById('player-select');
+  const sorted = Object.values(stats).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  sel.innerHTML = '<option value="">Elegí un jugador…</option>' +
+    sorted.map(s => `<option value="${s.name}">${s.name}${s.isGuest ? ' (invitado)' : ''}</option>`).join('');
+  sel.addEventListener('change', () => renderPlayerPanel(sel.value, stats));
+  renderPlayerPanel('', stats);
+}
+function renderPlayerPanel(name, stats){
+  const panel = document.getElementById('player-panel');
+  if (!name){
+    panel.innerHTML = `<div class="pp-empty"><span class="em">⚽</span>Elegí un jugador del menú para ver sus stats y su historial partido a partido.</div>`;
+    return;
+  }
+  const s = stats[name];
+  if (!s){
+    panel.innerHTML = `<div class="pp-empty"><span class="em">❔</span>Jugador no encontrado.</div>`;
+    return;
+  }
+  if (s.played === 0){
+    panel.innerHTML = `
+      <div class="pp-head">${av(s.name, 'lg')}<div><div class="who">${s.name}${s.isGuest ? ' <span class="guest">invitado</span>' : ''}</div><div class="pj">Sin partidos todavía</div></div></div>
+      <div class="pp-empty"><span class="em">📭</span>Este jugador todavía no jugó ningún partido.</div>`;
+    return;
+  }
+  const points = s.wins * 3 + s.draws;
+  const max = s.played * 3;
+  const pct = max ? Math.round((points / max) * 100) : 0;
+  const streak = computeStreak(s.matches);
+  const tiles = [
+    { n: s.played, l: 'Partidos' },
+    { n: `${s.wins}-${s.draws}-${s.losses}`, l: 'G · E · P' },
+    { n: `${pct}%`, l: `% puntos (${points}/${max})`, good: pct >= 50, bad: pct <= 30 && s.played >= 2 },
+    { n: `${streak.emoji} ${streak.count}`, l: streak.label, good: streak.type === 'win', bad: streak.type === 'loss' },
+    { n: s.mvps, l: s.mvps === 1 ? 'MVP' : 'MVPs', good: s.mvps > 0 },
+    { n: s.goleadorCount, l: 'Goleador', good: s.goleadorCount > 0 }
+  ];
+  const sortedMatches = [...s.matches].sort((a, b) => b.date.localeCompare(a.date));
+  const teamLabel = t => t === 'claros' ? 'Claros' : 'Oscuros';
+  const resultLabel = o => o === 'win' ? 'Ganó' : o === 'loss' ? 'Perdió' : 'Empate';
+  panel.innerHTML = `
+    <div class="pp-head">${av(s.name, 'lg')}<div><div class="who">${s.name}${s.isGuest ? ' <span class="guest">invitado</span>' : ''}</div><div class="pj">${s.played} ${s.played === 1 ? 'partido jugado' : 'partidos jugados'}</div></div></div>
+    <div class="tiles">
+      ${tiles.map(t => `<div class="tile ${t.good ? 'good' : ''}${t.bad ? ' bad' : ''}"><div class="tn">${t.n}</div><div class="tl">${t.l}</div></div>`).join('')}
+    </div>
+    <div class="p2p">
+      <div class="p2p-lbl">Partido a partido</div>
+      ${sortedMatches.map(m => `
+        <div class="p2p-row">
+          <span class="pdate">${formatShort(m.date)}</span>
+          <span class="pteam">${teamLabel(m.team)}${m.mvp ? ' · ★ MVP' : ''}${m.goleador ? ' · ⚽ Goleador' : ''}</span>
+          <span class="pres ${m.outcome}">${resultLabel(m.outcome)}</span>
+        </div>`).join('')}
+    </div>`;
 }
 
-function openLightbox(photos, index) {
-  lightboxGallery = photos;
-  showLightboxAt(index);
-  lightboxPrev.style.display = photos.length > 1 ? '' : 'none';
-  lightboxNext.style.display = photos.length > 1 ? '' : 'none';
-  lightbox.hidden = false;
-  document.body.style.overflow = 'hidden';
+/* ============================================================
+   COUNT-UP, REVEAL, LIGHTBOX
+   ============================================================ */
+function countUp(el){
+  const end = +el.dataset.to, dur = 1000, t0 = performance.now();
+  function tick(t){
+    const p = Math.min((t - t0) / dur, 1);
+    el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 
-function closeLightbox() {
-  lightbox.hidden = true;
-  document.body.style.overflow = '';
-}
-
-document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
-lightboxPrev.addEventListener('click', () => showLightboxAt(lightboxIndex - 1));
-lightboxNext.addEventListener('click', () => showLightboxAt(lightboxIndex + 1));
-lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-document.addEventListener('keydown', (e) => {
-  if (lightbox.hidden) return;
-  if (e.key === 'Escape') closeLightbox();
-  else if (e.key === 'ArrowLeft') showLightboxAt(lightboxIndex - 1);
-  else if (e.key === 'ArrowRight') showLightboxAt(lightboxIndex + 1);
-});
-
-document.addEventListener('click', (e) => {
-  const musicPlay = e.target.closest('#music-play');
-  if (musicPlay) {
-    if (!ytReady || !ytPlayer) return;
-    const state = ytPlayer.getPlayerState();
-    if (state === 1) {
-      ytPlayer.pauseVideo();
-    } else {
-      if (state === 0) ytPlayer.seekTo(0);
-      ytPlayer.playVideo();
+function initReveal(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.querySelectorAll('[data-rise]').forEach(e => e.classList.add('in'));
+    return;
+  }
+  const io = new IntersectionObserver((entries, obs) => entries.forEach(e => {
+    if (e.isIntersecting){
+      e.target.classList.add('in');
+      if (e.target.id === 'statstrip') e.target.querySelectorAll('.num[data-to]').forEach(countUp);
+      obs.unobserve(e.target);
     }
-    return;
-  }
-  const musicClose = e.target.closest('#music-close');
-  if (musicClose) {
-    const corner = document.getElementById('music-corner');
-    corner.classList.add('collapsed');
-    corner.classList.remove('expanded');
-    return;
-  }
-  const musicTrigger = e.target.closest('#music-trigger');
-  if (musicTrigger) {
-    const corner = document.getElementById('music-corner');
-    corner.classList.add('expanded');
-    corner.classList.remove('collapsed');
-    return;
-  }
-  const hlToggle = e.target.closest('#highlights-toggle');
-  if (hlToggle) {
-    highlightsState.expanded = !highlightsState.expanded;
-    if (highlightsState.expanded) stopHighlightsRotation();
-    else { highlightsState.index = 0; startHighlightsRotation(); }
-    hlToggle.textContent = highlightsState.expanded ? 'Ver una' : `Ver todas (${highlightsState.facts.length})`;
-    renderHighlightsContent();
-    return;
-  }
-  const hlDot = e.target.closest('.hl-dot');
-  if (hlDot) {
-    highlightsState.index = parseInt(hlDot.dataset.dot, 10);
-    renderHighlightsContent();
-    startHighlightsRotation();
-    return;
-  }
-  const expandBtn = e.target.closest('.podium-expand-btn');
-  if (expandBtn) {
-    togglePodium(expandBtn.dataset.target);
-    return;
-  }
-  if (e.target.classList.contains('match-thumb')) {
-    const container = e.target.closest('.match-photos');
-    const photos = JSON.parse(container.dataset.photos);
-    const index = parseInt(e.target.dataset.index, 10);
-    openLightbox(photos, index);
-    return;
-  }
-  const galleryItem = e.target.closest('.gallery-item');
-  if (galleryItem) {
-    const strip = document.getElementById('gallery-strip');
-    const photos = JSON.parse(strip.dataset.photos || '[]');
-    const index = parseInt(galleryItem.dataset.index, 10);
-    if (photos.length) openLightbox(photos, index);
-    return;
-  }
-  const av = e.target.closest('.avatar.avatar-clickable');
-  if (av) {
-    const img = av.querySelector('img');
-    if (img && img.src) openLightbox([img.src], 0);
-  }
-});
+  }), { threshold: 0.15 });
+  document.querySelectorAll('[data-rise]').forEach(e => io.observe(e));
+}
 
+/* ---------- lightbox ---------- */
+let lbState = { photos: [], index: 0 };
+let galleryPhotos = [];
+let matchPhotos = {};
+
+function openLightbox(photos, index){
+  if (!photos || !photos.length) return;
+  lbState.photos = photos;
+  lbState.index = index || 0;
+  updateLightbox();
+  document.getElementById('lb').classList.add('open');
+}
+function closeLightbox(){ document.getElementById('lb').classList.remove('open'); }
+function navLightbox(dir){
+  const n = lbState.photos.length;
+  lbState.index = (lbState.index + dir + n) % n;
+  updateLightbox();
+}
+function updateLightbox(){
+  const p = lbState.photos[lbState.index];
+  document.getElementById('lb-img').src = p.url;
+  document.getElementById('lb-cap').textContent = p.caption || '';
+  document.getElementById('lb-counter').textContent = lbState.photos.length > 1 ? `${lbState.index + 1} / ${lbState.photos.length}` : '';
+  document.getElementById('lb-prev').style.display = lbState.photos.length > 1 ? '' : 'none';
+  document.getElementById('lb-next').style.display = lbState.photos.length > 1 ? '' : 'none';
+}
+
+/* ---------- music player (YouTube IFrame API) ---------- */
 let ytPlayer = null;
 let ytReady = false;
 
-function setupMusicPlayer() {
-  if (window.YT && window.YT.Player) {
-    createYtPlayer();
-  } else {
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      if (prev) prev();
-      createYtPlayer();
-    };
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-  }
+function setupMusicPlayer(){
+  if (window.YT && window.YT.Player){ createYtPlayer(); return; }
+  const prev = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = () => { if (prev) prev(); createYtPlayer(); };
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
 }
-
-function createYtPlayer() {
-  ytPlayer = new YT.Player('music-yt-mount', {
+function createYtPlayer(){
+  ytPlayer = new YT.Player('yt-mount', {
     videoId: 'ijnujobdJ4c',
-    width: '1',
-    height: '1',
+    width: '1', height: '1',
     playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
     events: {
-      onReady: () => { ytReady = true; },
+      onReady: () => { ytReady = true; updatePlayBtn(false); },
       onStateChange: (e) => {
-        const btn = document.getElementById('music-play');
-        if (!btn) return;
-        if (e.data === 1) {
-          btn.textContent = '⏸';
-          btn.classList.add('is-playing');
-          btn.setAttribute('aria-label', 'Pausar');
-        } else {
-          btn.textContent = '▶';
-          btn.classList.remove('is-playing');
-          btn.setAttribute('aria-label', 'Reproducir');
-        }
+        const playing = e.data === YT.PlayerState.PLAYING;
+        document.getElementById('player-pill').classList.toggle('playing', playing);
+        updatePlayBtn(playing);
       }
     }
   });
 }
+function updatePlayBtn(playing){
+  const btn = document.getElementById('pp-btn');
+  if (!btn) return;
+  btn.innerHTML = playing
+    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+}
 
-async function init() {
+/* ---------- click delegation ---------- */
+function initClickDelegation(){
+  document.addEventListener('click', (e) => {
+    // music
+    if (e.target.closest('#pp-btn')){
+      if (!ytReady || !ytPlayer) return;
+      const state = ytPlayer.getPlayerState();
+      if (state === 1) ytPlayer.pauseVideo();
+      else { if (state === 0) ytPlayer.seekTo(0); ytPlayer.playVideo(); }
+      return;
+    }
+    // gallery thumb
+    const shot = e.target.closest('[data-gallery-idx]');
+    if (shot){
+      openLightbox(galleryPhotos, +shot.dataset.galleryIdx);
+      return;
+    }
+    // match photo thumb
+    const matchPh = e.target.closest('[data-match-photos]');
+    if (matchPh){
+      const key = matchPh.dataset.matchPhotos;
+      const idx = +matchPh.dataset.matchPhotoIdx;
+      openLightbox(matchPhotos[key] || [], idx);
+      return;
+    }
+    // avatar clickable
+    const av = e.target.closest('.av.is-clickable');
+    if (av){
+      const img = av.querySelector('img');
+      if (img && img.src){
+        openLightbox([{ url: img.src, caption: av.dataset.name || '' }], 0);
+      }
+      return;
+    }
+    // lightbox controls
+    if (e.target.closest('#lb-close')){ closeLightbox(); return; }
+    if (e.target.closest('#lb-prev')){ navLightbox(-1); return; }
+    if (e.target.closest('#lb-next')){ navLightbox(1); return; }
+    if (e.target.id === 'lb'){ closeLightbox(); return; }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('lb').classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navLightbox(-1);
+    if (e.key === 'ArrowRight') navLightbox(1);
+  });
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function init(){
   try {
-    const data = await loadData();
-    const stats = computePlayerStats(data);
-    renderHeroStats(data);
+    DATA = await loadData();
+    STATS = computePlayerStats(DATA);
+
+    renderStatstrip(DATA);
+    renderSpotlights(STATS);
     renderHeroNote();
-    renderSpotlights(stats);
-    renderNextMatch(data);
-    renderHighlights(data, stats);
-    renderGallery(data);
-    renderPodiums(stats);
-    renderPlayerFilter(data, stats);
-    renderMatches(data);
+    renderCountdowns(DATA);
+    renderOpinions(DATA);
+    renderGallery(DATA);
+    renderPodiums(STATS);
+    renderMatches(DATA);
+    renderPlayerSelect(DATA, STATS);
+
+    initReveal();
+    initClickDelegation();
   } catch (e) {
-    document.querySelector('.container').innerHTML = `<div class="empty">Error cargando los datos: ${e.message}</div>`;
+    document.querySelector('.wrap').innerHTML =
+      `<div class="empty" style="margin:80px auto; max-width:400px"><span class="em">⚠️</span>Error cargando los datos: ${e.message}</div>`;
   }
 }
 
-init();
-setupMusicPlayer();
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  setupMusicPlayer();
+});
