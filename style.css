@@ -326,6 +326,26 @@ body::before{
 .match-shots .ph:hover{ transform:translateY(-2px); border-color:var(--border-hi); }
 
 /* ============================================================
+   CONTRA OTROS EQUIPOS
+   ============================================================ */
+.ext-matches{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.match.ext{ border-color:var(--border-hi); }
+.versus{ display:flex; align-items:center; gap:8px; margin-top:4px; font-size:14px; font-weight:600; flex-wrap:wrap; }
+.versus .us{ color:var(--text); }
+.versus .vs{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-mute); }
+.versus .rival{ color:var(--text); }
+.versus .rival.pending{ color:var(--text-mute); font-weight:500; font-style:italic; }
+.result.loss{ color:var(--red); border:1px solid rgba(229,86,75,.4); background:rgba(229,86,75,.10); }
+.result.pending{ color:var(--text-mute); border:1px dashed var(--border-hi); background:transparent; }
+.ext-lineup .tlbl{ display:flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
+.ext-lineup .tlbl .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+.ext-lineup{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
+.ext-lineup .tlbl{ grid-column:1/-1; }
+.ext-nolineup{ grid-column:1/-1; color:var(--text-mute); font-size:12px; font-style:italic; }
+.ext-notes{ margin-top:12px; font-size:12px; color:var(--text-dim); }
+
+/* ============================================================
    STATS POR JUGADOR
    ============================================================ */
 .selectwrap{ position:relative; }
@@ -432,6 +452,7 @@ footer.foot{ margin:80px 0 40px; text-align:center; color:var(--text-mute); font
   .opinions{ grid-template-columns:repeat(2,1fr); }
   .podiums{ grid-template-columns:1fr; }
   .matches{ grid-template-columns:1fr; }
+  .ext-matches{ grid-template-columns:1fr; }
   .tiles{ grid-template-columns:repeat(3,1fr); }
 }
 @media (max-width:520px){
@@ -448,6 +469,7 @@ footer.foot{ margin:80px 0 40px; text-align:center; color:var(--text-mute); font
   .countdowns{ grid-template-columns:1fr; }
   .opinions{ grid-template-columns:1fr; }
   .teams{ grid-template-columns:1fr; }
+  .ext-lineup{ grid-template-columns:1fr; }
   .team.oscuros-team{ margin-top:4px; }
   .tiles{ grid-template-columns:repeat(2,1fr); }
   .p2p-row .pdate{ width:80px; }

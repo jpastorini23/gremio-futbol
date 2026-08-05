@@ -353,6 +353,80 @@ function renderMatches(data){
   });
 }
 
+/* ---------- partidos contra otros equipos ----------
+   Viven aparte de la liga interna: no suman a podios, statstrip ni
+   a las stats por jugador, que son solo Claros vs Oscuros. */
+function renderExternalMatches(data){
+  const wrap = document.getElementById('ext-matches');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const list = Array.isArray(data.externalMatches) ? data.externalMatches : [];
+  if (!list.length){
+    wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><span class="em">🆚</span>Todavía no se cargaron partidos contra otros equipos.</div>`;
+    return;
+  }
+
+  const regulars = new Set(data.players);
+  const sorted = [...list].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  sorted.forEach((m, i) => {
+    const resultMap = {
+      win:  { cls: 'win',  txt: 'Ganamos' },
+      loss: { cls: 'loss', txt: 'Perdimos' },
+      draw: { cls: 'draw', txt: 'Empate' }
+    };
+    const r = resultMap[m.result];
+    const resultPill = r
+      ? `<span class="result ${r.cls}">${r.txt}${m.score ? ` · ${m.score}` : ''}</span>`
+      : `<span class="result pending">Resultado sin cargar</span>`;
+
+    const rival = m.opponent
+      ? `<span class="rival">${m.opponent}</span>`
+      : `<span class="rival pending">Rival sin cargar</span>`;
+
+    const when = m.date ? formatShort(m.date) : 'Fecha sin registrar';
+    const where = m.stadium ? `📍 ${m.stadium}` : '';
+
+    const lineup = Array.isArray(m.lineup) ? m.lineup : [];
+    const players = lineup.length
+      ? lineup.map(p => `<div class="player">${av(p, 'xs')}<span>${p}</span>${regulars.has(p) ? '' : '<span class="guest-tag">inv</span>'}</div>`).join('')
+      : `<div class="ext-nolineup">Formación sin cargar</div>`;
+
+    const gol = m.goleador
+      ? `<div class="award gol">${av(m.goleador, 'sm')}<div><div class="k">Goleador</div><div class="v">${m.goleador}</div></div></div>`
+      : '';
+    const mvp = m.mvp
+      ? `<div class="award mvp">${av(m.mvp, 'sm')}<div><div class="k">Figura</div><div class="v">${m.mvp}</div></div></div>`
+      : '';
+    const awards = (gol || mvp) ? `<div class="awards">${gol}${mvp}</div>` : '';
+
+    const photos = Array.isArray(m.photos) ? m.photos : [];
+    const key = 'ext:' + (m.id || i);
+    matchPhotos[key] = photos.map(url => ({ url, caption: [when, m.opponent].filter(Boolean).join(' · ') }));
+    const shots = photos.length
+      ? `<div class="match-shots">${photos.map((url, idx) => `<button class="ph" data-match-photos="${key}" data-match-photo-idx="${idx}" aria-label="Ver foto" style="background-image:url('${url}')"></button>`).join('')}</div>`
+      : '';
+
+    wrap.appendChild(el(`
+      <article class="match ext" data-rise>
+        <div class="match-head">
+          <div>
+            <div class="dt">${when}${where ? ' · ' + where : ''}</div>
+            <div class="versus"><span class="us">El Gremio</span><span class="vs">vs</span>${rival}</div>
+          </div>
+          ${resultPill}
+        </div>
+        <div class="ext-lineup">
+          <div class="tlbl"><span class="dot"></span>Nuestra formación</div>
+          ${players}
+        </div>
+        ${awards}
+        ${shots}
+        ${m.notes ? `<div class="ext-notes">${m.notes}</div>` : ''}
+      </article>`));
+  });
+}
+
 /* ---------- player panel ---------- */
 function renderPlayerSelect(data, stats){
   const sel = document.getElementById('player-select');
@@ -564,6 +638,7 @@ async function init(){
     renderGallery(DATA);
     renderPodiums(STATS);
     renderMatches(DATA);
+    renderExternalMatches(DATA);
     renderPlayerSelect(DATA, STATS);
 
     initReveal();

@@ -79,6 +79,21 @@
       "text": "Tenía todo el arco y le rompió la cara al compañero"
     }
   ],
+  "externalMatches": [
+    {
+      "id": "ext-1",
+      "date": "",
+      "opponent": "",
+      "result": "",
+      "score": "",
+      "lineup": ["Juancho", "Rama", "Gasti", "Luki", "Juli", "Mickey"],
+      "goleador": "Mickey",
+      "mvp": "Juancho",
+      "stadium": "",
+      "photos": [],
+      "notes": ""
+    }
+  ],
   "matches": [
     {
       "date": "2026-06-04",
