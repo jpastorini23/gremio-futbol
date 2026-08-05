@@ -158,26 +158,24 @@ function renderStatstrip(data){
   ).join('');
 }
 
-function renderSpotlights(data){
-  const last = [...data.matches].sort(byDateDesc)[0];
+function renderSpotlights(stats){
+  const arr = Object.values(stats);
 
-  const card = (elId, role, name, sub, emptySub) => {
-    const target = document.getElementById(elId);
-    target.innerHTML = name
-      ? av(name, 'lg') + `<div class="meta"><div class="role">${role}</div><div class="who">${name}</div><div class="sub">${sub}</div></div>`
-      : `<div class="meta"><div class="role">${role}</div><div class="who">—</div><div class="sub">${emptySub}</div></div>`;
+  const top3 = (countField, lastField) => arr
+    .filter(s => s[countField] > 0)
+    .sort((a, b) => b[countField] - a[countField] || b[lastField].localeCompare(a[lastField]))
+    .slice(0, 3)
+    .map(s => ({ name: s.name, value: s[countField], isGuest: s.isGuest }));
+
+  const card = (elId, role, rows, emptyMsg) => {
+    document.getElementById(elId).innerHTML =
+      `<div class="role">${role}</div>` +
+      (rows.length ? `<div class="spot-rows">${podiumRows(rows, 'n')}</div>`
+                   : `<div class="spot-empty">${emptyMsg}</div>`);
   };
 
-  if (!last){
-    card('spot-fig', '★ Figura del último partido', '', '', 'Todavía no hay partidos');
-    card('spot-gol', '⚽ Goleador del último partido', '', '', 'Todavía no hay partidos');
-    return;
-  }
-
-  const when = [matchWhen(last), last.stadium].filter(Boolean).join(' · ');
-  card('spot-fig', '★ Figura del último partido', last.mvp, when, 'Sin figura cargada');
-  card('spot-gol', '⚽ Goleador del último partido', last.goleador, when,
-    last.winner === 'draw' ? 'Sin goleador · fue empate' : 'Sin goleador cargado');
+  card('spot-fig', '★ Top 3 figuras', top3('mvps', 'lastMvpDate'), 'Todavía sin figuras');
+  card('spot-gol', '⚽ Top 3 goleadores', top3('goleadorCount', 'lastGoleadorDate'), 'Todavía sin goleadores');
 }
 
 function renderHeroNote(){
@@ -683,7 +681,7 @@ async function init(){
     STATS = computePlayerStats(DATA);
 
     renderStatstrip(DATA);
-    renderSpotlights(DATA);
+    renderSpotlights(STATS);
     renderHeroNote();
     renderOpinions(DATA);
     renderGallery(DATA);
