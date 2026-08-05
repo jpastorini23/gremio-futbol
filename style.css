@@ -359,6 +359,27 @@ body::before{
 .acc-body .player-panel{ background:transparent; border:0; padding:0; }
 
 /* ============================================================
+   LINKS (TERCER TIEMPO)
+   ============================================================ */
+.links{ display:flex; flex-direction:column; gap:8px; }
+.link-row{
+  display:flex; align-items:center; gap:12px; padding:14px 16px; text-decoration:none; color:var(--text);
+  background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--r-md);
+  transition:background .15s var(--ease), border-color .15s var(--ease);
+}
+.link-row:hover{ background:var(--bg-card-2); border-color:var(--border-hi); }
+.link-meta{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.link-title{ display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; }
+.link-sub{ font-size:12px; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tag-18{
+  font-size:9px; font-weight:700; letter-spacing:.08em; color:var(--red);
+  border:1px solid rgba(229,86,75,.45); background:rgba(229,86,75,.10);
+  border-radius:4px; padding:2px 5px; flex:none;
+}
+.link-go{ margin-left:auto; color:var(--text-mute); font-size:15px; flex:none; }
+.link-row:hover .link-go{ color:var(--accent); }
+
+/* ============================================================
    CONTRA OTROS EQUIPOS
    ============================================================ */
 .ext-matches{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }

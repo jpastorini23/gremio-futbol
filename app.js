@@ -381,6 +381,29 @@ function renderMatches(data){
   });
 }
 
+/* ---------- links del tercer tiempo ---------- */
+function renderRelaxLinks(data){
+  const wrap = document.getElementById('relax-links');
+  if (!wrap) return;
+  const links = Array.isArray(data.relaxLinks) ? data.relaxLinks : [];
+  if (!links.length){
+    wrap.innerHTML = `<div class="empty"><span class="em">🍸</span>Todavía no hay nada cargado acá.</div>`;
+    return;
+  }
+  wrap.innerHTML = links.map(l => {
+    let host = '';
+    try { host = new URL(l.url).hostname.replace(/^www\./, ''); } catch { host = l.url; }
+    return `
+      <a class="link-row" href="${l.url}" target="_blank" rel="noopener noreferrer nofollow">
+        <span class="link-meta">
+          <span class="link-title">${l.title}${l.adult ? '<span class="tag-18">+18</span>' : ''}</span>
+          <span class="link-sub">${l.note ? l.note + ' · ' : ''}${host}</span>
+        </span>
+        <span class="link-go" aria-hidden="true">↗</span>
+      </a>`;
+  }).join('');
+}
+
 /* ---------- partidos contra otros equipos ----------
    Viven aparte de la liga interna: no suman a podios, statstrip ni
    a las stats por jugador, que son solo Claros vs Oscuros. */
@@ -667,6 +690,7 @@ async function init(){
     renderPodiums(STATS);
     renderMatches(DATA);
     renderExternalMatches(DATA);
+    renderRelaxLinks(DATA);
     renderPlayerSelect(DATA, STATS);
 
     initReveal();
