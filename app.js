@@ -384,7 +384,8 @@ function renderExternalMatches(data){
       ? `<span class="rival">${m.opponent}</span>`
       : `<span class="rival pending">Rival sin cargar</span>`;
 
-    const when = m.date ? formatShort(m.date) : 'Fecha sin registrar';
+    // dateLabel es para fechas imprecisas ("Julio 2026") donde no hay día exacto
+    const when = m.dateLabel || (m.date ? formatShort(m.date) : 'Fecha sin registrar');
     const where = m.stadium ? `📍 ${m.stadium}` : '';
 
     const lineup = Array.isArray(m.lineup) ? m.lineup : [];

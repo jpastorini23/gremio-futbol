@@ -326,6 +326,36 @@ body::before{
 .match-shots .ph:hover{ transform:translateY(-2px); border-color:var(--border-hi); }
 
 /* ============================================================
+   ACORDEONES
+   ============================================================ */
+.accordions{ margin-top:48px; display:flex; flex-direction:column; gap:10px; }
+.acc{ background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; }
+.acc[open]{ border-color:var(--border-hi); box-shadow:var(--shadow-card); }
+.acc > summary{
+  display:flex; align-items:center; gap:14px; padding:18px 20px; cursor:pointer;
+  list-style:none; user-select:none; transition:background .15s var(--ease);
+}
+.acc > summary::-webkit-details-marker{ display:none; }
+.acc > summary:hover{ background:var(--bg-card-2); }
+.acc > summary:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.acc-ico{ font-size:20px; line-height:1; flex:none; }
+.acc-txt{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.acc-txt .eyebrow{ margin:0; }
+.acc-txt strong{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+.acc-chev{
+  margin-left:auto; flex:none; width:10px; height:10px; border-right:2px solid var(--text-dim);
+  border-bottom:2px solid var(--text-dim); transform:rotate(45deg) translate(-2px,-2px);
+  transition:transform .2s var(--ease), border-color .2s var(--ease);
+}
+.acc[open] > summary .acc-chev{ transform:rotate(-135deg) translate(-2px,-2px); border-color:var(--accent); }
+.acc-body{ padding:4px 20px 22px; }
+.acc-note{ color:var(--text-dim); font-size:13px; margin:0 0 14px; }
+/* dentro del acordeón el panel ya está sobre una card: sacamos el doble marco */
+.acc-body .selectwrap{ margin-bottom:14px; }
+.acc-body .selectwrap select{ width:100%; }
+.acc-body .player-panel{ background:transparent; border:0; padding:0; }
+
+/* ============================================================
    CONTRA OTROS EQUIPOS
    ============================================================ */
 .ext-matches{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }

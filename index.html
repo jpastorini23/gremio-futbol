@@ -53,38 +53,58 @@
       <div id="hero-note"></div>
     </section>
 
-    <!-- ============ OPINIONES ============ -->
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">La tribuna</p>
-          <h2 class="section-title">Lo que opina la gente</h2>
-        </div>
-      </div>
-      <div class="opinions" id="opinions"></div>
-    </section>
+    <!-- ============ ACORDEONES ============
+         Todos cerrados por arranque: la página entera entra en una pantalla
+         y cada uno se abre al tocarlo. -->
+    <div class="accordions">
 
-    <!-- ============ GALERÍA ============ -->
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">El álbum</p>
-          <h2 class="section-title">Galería</h2>
+      <details class="acc" name="acc">
+        <summary>
+          <span class="acc-ico">📊</span>
+          <span class="acc-txt"><span class="eyebrow">La ficha</span><strong>Stats por jugador</strong></span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="acc-body">
+          <div class="selectwrap">
+            <select id="player-select" aria-label="Elegí un jugador">
+              <option value="">Elegí un jugador…</option>
+            </select>
+          </div>
+          <div class="player-panel" id="player-panel"></div>
         </div>
-        <span class="section-sub">Deslizá ←→</span>
-      </div>
-      <div class="gallery" id="gallery"></div>
-    </section>
+      </details>
 
-    <!-- ============ PODIOS ============ -->
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">El ranking</p>
-          <h2 class="section-title">Los que la vienen rompiendo</h2>
+      <details class="acc" name="acc">
+        <summary>
+          <span class="acc-ico">⚽</span>
+          <span class="acc-txt"><span class="eyebrow">El registro</span><strong>Historial de partidos</strong></span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="acc-body">
+          <div class="matches" id="matches"></div>
         </div>
-      </div>
-      <div class="podiums">
+      </details>
+
+      <details class="acc" name="acc">
+        <summary>
+          <span class="acc-ico">🆚</span>
+          <span class="acc-txt"><span class="eyebrow">Fuera del gremio</span><strong>Contra otros equipos</strong></span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="acc-body">
+          <p class="acc-note">No cuenta para la liga interna</p>
+          <div class="ext-matches" id="ext-matches"></div>
+        </div>
+      </details>
+
+      <details class="acc" name="acc">
+        <summary>
+          <span class="acc-ico">🏆</span>
+          <span class="acc-txt"><span class="eyebrow">El ranking</span><strong>Los que la vienen rompiendo</strong></span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="acc-body">
+          <div class="podiums">
         <div class="podium" data-rise style="--i:0">
           <h3><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16 14 18 21 12 17 6 21 8 14 2 9 9 9"/></svg>Más MVPs</h3>
           <div id="pod-mvp"></div>
@@ -98,47 +118,34 @@
           <div id="pod-pts"></div>
           <div class="foot">Mínimo 2 partidos jugados</div>
         </div>
-      </div>
-    </section>
+          </div>
+        </div>
+      </details>
 
-    <!-- ============ HISTORIAL ============ -->
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">El registro</p>
-          <h2 class="section-title">Historial de partidos</h2>
+      <details class="acc" name="acc">
+        <summary>
+          <span class="acc-ico">📸</span>
+          <span class="acc-txt"><span class="eyebrow">El álbum</span><strong>Galería</strong></span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="acc-body">
+          <p class="acc-note">Deslizá ←→</p>
+          <div class="gallery" id="gallery"></div>
         </div>
-      </div>
-      <div class="matches" id="matches"></div>
-    </section>
+      </details>
 
-    <!-- ============ CONTRA OTROS EQUIPOS ============ -->
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">Fuera del gremio</p>
-          <h2 class="section-title">Contra otros equipos</h2>
+      <details class="acc" name="acc">
+        <summary>
+          <span class="acc-ico">📣</span>
+          <span class="acc-txt"><span class="eyebrow">La tribuna</span><strong>Lo que opina la gente</strong></span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="acc-body">
+          <div class="opinions" id="opinions"></div>
         </div>
-        <span class="section-sub">No cuenta para la liga interna</span>
-      </div>
-      <div class="ext-matches" id="ext-matches"></div>
-    </section>
+      </details>
 
-    <!-- ============ STATS POR JUGADOR ============ -->
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">La ficha</p>
-          <h2 class="section-title">Stats por jugador</h2>
-        </div>
-        <div class="selectwrap">
-          <select id="player-select" aria-label="Elegí un jugador">
-            <option value="">Elegí un jugador…</option>
-          </select>
-        </div>
-      </div>
-      <div class="player-panel" id="player-panel"></div>
-    </section>
+    </div>
 
     <footer class="foot">El Gremio Fútbol · hecho con cariño y cargadas · 2026</footer>
   </div>
