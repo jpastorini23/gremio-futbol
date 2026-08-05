@@ -130,32 +130,26 @@ function renderStatstrip(data){
   ).join('');
 }
 
-function renderSpotlights(stats){
-  const arr = Object.values(stats).filter(s => !s.isGuest);
+function renderSpotlights(data){
+  const last = [...data.matches].sort((a, b) => b.date.localeCompare(a.date))[0];
 
-  const topMvp = arr.filter(s => s.mvps > 0)
-    .sort((a, b) => b.mvps - a.mvps || b.lastMvpDate.localeCompare(a.lastMvpDate))[0];
-  const topGol = arr.filter(s => s.goleadorCount > 0)
-    .sort((a, b) => b.goleadorCount - a.goleadorCount || b.lastGoleadorDate.localeCompare(a.lastGoleadorDate))[0];
+  const card = (elId, role, name, sub, emptySub) => {
+    const target = document.getElementById(elId);
+    target.innerHTML = name
+      ? av(name, 'lg') + `<div class="meta"><div class="role">${role}</div><div class="who">${name}</div><div class="sub">${sub}</div></div>`
+      : `<div class="meta"><div class="role">${role}</div><div class="who">—</div><div class="sub">${emptySub}</div></div>`;
+  };
 
-  const figEl = document.getElementById('spot-fig');
-  if (topMvp){
-    const subParts = [`${topMvp.mvps} MVP${topMvp.mvps > 1 ? 's' : ''}`];
-    if (topMvp.losses === 0 && topMvp.played > 0) subParts.push('invicto');
-    figEl.innerHTML = av(topMvp.name, 'lg') +
-      `<div class="meta"><div class="role">★ Figura del torneo</div><div class="who">${topMvp.name}</div><div class="sub">${subParts.join(' · ')}</div></div>`;
-  } else {
-    figEl.innerHTML = `<div class="meta"><div class="role">★ Figura del torneo</div><div class="who">—</div><div class="sub">Todavía sin MVP</div></div>`;
+  if (!last){
+    card('spot-fig', '★ Figura del último partido', '', '', 'Todavía no hay partidos');
+    card('spot-gol', '⚽ Goleador del último partido', '', '', 'Todavía no hay partidos');
+    return;
   }
 
-  const golEl = document.getElementById('spot-gol');
-  if (topGol){
-    const sub = topGol.goleadorCount === 1 ? 'Goleador en 1 partido' : `Goleador en ${topGol.goleadorCount} partidos`;
-    golEl.innerHTML = av(topGol.name, 'lg') +
-      `<div class="meta"><div class="role">⚽ Goleador del torneo</div><div class="who">${topGol.name}</div><div class="sub">${sub}</div></div>`;
-  } else {
-    golEl.innerHTML = `<div class="meta"><div class="role">⚽ Goleador del torneo</div><div class="who">—</div><div class="sub">Sin goleador del torneo</div></div>`;
-  }
+  const when = [formatShort(last.date), last.stadium].filter(Boolean).join(' · ');
+  card('spot-fig', '★ Figura del último partido', last.mvp, when, 'Sin figura cargada');
+  card('spot-gol', '⚽ Goleador del último partido', last.goleador, when,
+    last.winner === 'draw' ? 'Sin goleador · fue empate' : 'Sin goleador cargado');
 }
 
 function renderHeroNote(){
@@ -633,7 +627,7 @@ async function init(){
     STATS = computePlayerStats(DATA);
 
     renderStatstrip(DATA);
-    renderSpotlights(STATS);
+    renderSpotlights(DATA);
     renderHeroNote();
     renderOpinions(DATA);
     renderGallery(DATA);
