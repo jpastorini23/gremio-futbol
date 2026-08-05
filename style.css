@@ -296,6 +296,9 @@ body::before{
 .result{ font-size:10px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; border-radius:var(--r-pill); padding:6px 11px; white-space:nowrap; }
 .result.win{ color:var(--accent); border:1px solid var(--accent-line); background:var(--accent-soft); }
 .result.draw{ color:var(--text-dim); border:1px solid var(--border); }
+.result.pending{ color:var(--text-mute); border:1px dashed var(--border-hi); background:transparent; }
+.no-lineup{ color:var(--text-mute); font-size:13px; font-style:italic; padding:14px; text-align:center;
+  border:1px dashed var(--border); border-radius:var(--r-md); }
 .teams{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .team .tlbl{ display:flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
 .team .tlbl .dot{ width:6px; height:6px; border-radius:50%; }

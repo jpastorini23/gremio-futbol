@@ -11,7 +11,8 @@
     "Juancho",
     "Luki",
     "Rama",
-    "Sean"
+    "Sean",
+    "Luciano"
   ],
   "events": [
     {
@@ -96,6 +97,34 @@
     }
   ],
   "matches": [
+    {
+      "id": "araoz-2",
+      "date": "",
+      "dateLabel": "Julio 2026",
+      "sortKey": "2026-07-b",
+      "claros": ["Gasti", "Juani", "Mickey", "Luki", "Mati"],
+      "oscuros": ["Minu", "Tincho", "Juli", "Rama", "Luciano"],
+      "winner": "",
+      "goleador": "Juani",
+      "mvp": "Luciano",
+      "stadium": "Araoz",
+      "photos": [],
+      "notes": ""
+    },
+    {
+      "id": "araoz-1",
+      "date": "",
+      "dateLabel": "Julio 2026",
+      "sortKey": "2026-07-a",
+      "claros": [],
+      "oscuros": [],
+      "winner": "oscuros",
+      "goleador": "Luki",
+      "mvp": "Juancho",
+      "stadium": "Araoz",
+      "photos": [],
+      "notes": ""
+    },
     {
       "date": "2026-06-04",
       "claros": ["Gasti", "Rama", "Mati", "Juli", "Luki"],

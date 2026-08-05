@@ -31,6 +31,18 @@ function formatLong(d){
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+/* ---------- fechas de partido ----------
+   Algunos partidos se cargaron sin día exacto: llevan dateLabel para mostrar
+   ("Julio 2026") y sortKey solo para ordenarlos. sortKey no es una fecha, es
+   una clave de orden: se compara como texto contra las fechas ISO. */
+function matchKey(m){ return m.date || m.sortKey || ''; }
+function matchWhen(m){
+  if (m.dateLabel) return m.dateLabel;
+  return m.date ? formatShort(m.date) : 'Fecha sin registrar';
+}
+function matchId(m){ return m.id || m.date || m.sortKey || ''; }
+function byDateDesc(a, b){ return matchKey(b).localeCompare(matchKey(a)); }
+
 /* ---------- data ---------- */
 let DATA = null;
 let STATS = null;
@@ -54,7 +66,7 @@ function computePlayerStats(data){
   for (const p of allNames){
     stats[p] = {
       name: p, isGuest: !regulars.has(p),
-      played: 0, wins: 0, losses: 0, draws: 0,
+      played: 0, decided: 0, wins: 0, losses: 0, draws: 0,
       mvps: 0, lastMvpDate: '',
       goleadorCount: 0, lastGoleadorDate: '',
       matches: []
@@ -62,25 +74,41 @@ function computePlayerStats(data){
   }
 
   for (const m of data.matches){
-    const all = [...m.claros.map(p => ['claros', p]), ...m.oscuros.map(p => ['oscuros', p])];
+    const key = matchKey(m);
+    const all = [...(m.claros || []).map(p => ['claros', p]), ...(m.oscuros || []).map(p => ['oscuros', p])];
     for (const [team, p] of all){
       if (!stats[p]) continue;
-      const outcome = m.winner === 'draw' ? 'draw' : (m.winner === team ? 'win' : 'loss');
+      // Sin winner el partido está cargado pero sin resultado: cuenta como
+      // jugado y queda fuera del cómputo de puntos hasta que se sepa.
+      const outcome = !m.winner ? 'unknown'
+                    : m.winner === 'draw' ? 'draw'
+                    : (m.winner === team ? 'win' : 'loss');
       stats[p].played++;
+      if (outcome !== 'unknown') stats[p].decided++;
       if (outcome === 'win') stats[p].wins++;
       else if (outcome === 'loss') stats[p].losses++;
-      else stats[p].draws++;
-      if (m.mvp === p){ stats[p].mvps++; if (m.date > stats[p].lastMvpDate) stats[p].lastMvpDate = m.date; }
-      if (m.goleador === p){ stats[p].goleadorCount++; if (m.date > stats[p].lastGoleadorDate) stats[p].lastGoleadorDate = m.date; }
-      stats[p].matches.push({ date: m.date, team, outcome, mvp: m.mvp === p, goleador: m.goleador === p });
+      else if (outcome === 'draw') stats[p].draws++;
+      stats[p].matches.push({ key, when: matchWhen(m), team, outcome, mvp: m.mvp === p, goleador: m.goleador === p });
+    }
+
+    // Los premios se cuentan aparte de la formación: si un partido quedó
+    // cargado sin equipos, la figura y el goleador igual valen.
+    if (m.mvp && stats[m.mvp]){
+      stats[m.mvp].mvps++;
+      if (key > stats[m.mvp].lastMvpDate) stats[m.mvp].lastMvpDate = key;
+    }
+    if (m.goleador && stats[m.goleador]){
+      stats[m.goleador].goleadorCount++;
+      if (key > stats[m.goleador].lastGoleadorDate) stats[m.goleador].lastGoleadorDate = key;
     }
   }
   return stats;
 }
 
 function computeStreak(matches){
-  if (!matches.length) return { type: 'none', count: 0, emoji: '', label: 'Sin partidos' };
-  const sorted = [...matches].sort((a, b) => b.date.localeCompare(a.date));
+  const decided = matches.filter(m => m.outcome !== 'unknown');
+  if (!decided.length) return { type: 'none', count: 0, emoji: '', label: 'Sin racha' };
+  const sorted = [...decided].sort((a, b) => b.key.localeCompare(a.key));
   const recent = sorted[0].outcome;
   let count = 0;
   for (const m of sorted){ if (m.outcome === recent) count++; else break; }
@@ -131,7 +159,7 @@ function renderStatstrip(data){
 }
 
 function renderSpotlights(data){
-  const last = [...data.matches].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const last = [...data.matches].sort(byDateDesc)[0];
 
   const card = (elId, role, name, sub, emptySub) => {
     const target = document.getElementById(elId);
@@ -146,7 +174,7 @@ function renderSpotlights(data){
     return;
   }
 
-  const when = [formatShort(last.date), last.stadium].filter(Boolean).join(' · ');
+  const when = [matchWhen(last), last.stadium].filter(Boolean).join(' · ');
   card('spot-fig', '★ Figura del último partido', last.mvp, when, 'Sin figura cargada');
   card('spot-gol', '⚽ Goleador del último partido', last.goleador, when,
     last.winner === 'draw' ? 'Sin goleador · fue empate' : 'Sin goleador cargado');
@@ -223,22 +251,22 @@ function renderGallery(data){
   const wrap = document.getElementById('gallery');
   wrap.innerHTML = '';
   const items = [];
-  for (const m of [...data.matches].sort((a, b) => b.date.localeCompare(a.date))){
+  for (const m of [...data.matches].sort(byDateDesc)){
     if (!Array.isArray(m.photos)) continue;
     for (const photo of m.photos){
-      items.push({ photo, date: m.date, where: m.stadium || '' });
+      items.push({ photo, when: matchWhen(m), where: m.stadium || '' });
     }
   }
   if (!items.length){
     wrap.innerHTML = `<div class="empty" style="margin:0"><span class="em">📸</span>Sin fotos todavía</div>`;
     return;
   }
-  galleryPhotos = items.map(i => ({ url: i.photo, caption: `${formatShort(i.date)}${i.where ? ' · ' + i.where : ''}` }));
+  galleryPhotos = items.map(i => ({ url: i.photo, caption: `${i.when}${i.where ? ' · ' + i.where : ''}` }));
   items.forEach((it, i) => {
     wrap.appendChild(el(`
       <button class="shot" data-gallery-idx="${i}" aria-label="Abrir foto">
         <div class="ph" style="background-image:url('${it.photo}')"></div>
-        <span class="cap">${formatShort(it.date)}<br><span class="where">📍 ${it.where || 'Sin sede'}</span></span>
+        <span class="cap">${it.when}<br><span class="where">📍 ${it.where || 'Sin sede'}</span></span>
       </button>`));
   });
 }
@@ -281,12 +309,12 @@ function renderPodiums(stats){
     golEl.innerHTML = podiumRows(gols, 'n');
   }
 
-  const pts = arr.filter(s => s.played >= 2)
+  const pts = arr.filter(s => s.decided >= 2)
     .map(s => {
       const points = s.wins * 3 + s.draws;
-      const max = s.played * 3;
+      const max = s.decided * 3;
       const pct = max ? Math.round((points / max) * 100) : 0;
-      return { name: s.name, value: pct, pj: s.played, isGuest: s.isGuest };
+      return { name: s.name, value: pct, pj: s.decided, isGuest: s.isGuest };
     })
     .sort((a, b) => b.value - a.value || b.pj - a.pj)
     .slice(0, 5);
@@ -299,7 +327,7 @@ function renderPodiums(stats){
 function renderMatches(data){
   const wrap = document.getElementById('matches');
   wrap.innerHTML = '';
-  const matches = [...data.matches].sort((a, b) => b.date.localeCompare(a.date));
+  const matches = [...data.matches].sort(byDateDesc);
   if (!matches.length){
     wrap.innerHTML = `<div class="empty" style="grid-column:1/-1"><span class="em">⚽</span>Todavía no se cargaron partidos.</div>`;
     return;
@@ -314,33 +342,39 @@ function renderMatches(data){
 
     const resultText = m.winner === 'claros' ? 'Ganó Claros'
                      : m.winner === 'oscuros' ? 'Ganó Oscuros'
-                     : 'Empate';
-    const resultCls = m.winner === 'draw' ? 'draw' : 'win';
+                     : m.winner === 'draw' ? 'Empate'
+                     : 'Resultado sin cargar';
+    const resultCls = m.winner === 'draw' ? 'draw' : !m.winner ? 'pending' : 'win';
 
     const gol = m.goleador
       ? `<div class="award gol">${av(m.goleador, 'sm')}<div><div class="k">Goleador</div><div class="v">${m.goleador}</div></div></div>`
-      : `<div class="award empty-award">Sin goleador · fue empate</div>`;
+      : `<div class="award empty-award">${m.winner === 'draw' ? 'Sin goleador · fue empate' : 'Sin goleador cargado'}</div>`;
     const mvp = m.mvp
       ? `<div class="award mvp">${av(m.mvp, 'sm')}<div><div class="k">MVP</div><div class="v">${m.mvp}</div></div></div>`
       : '';
 
     const photos = Array.isArray(m.photos) ? m.photos : [];
-    const matchPhotosKey = m.date;
-    matchPhotos[matchPhotosKey] = photos.map(url => ({ url, caption: `${formatShort(m.date)}${m.stadium ? ' · ' + m.stadium : ''}` }));
+    const matchPhotosKey = matchId(m);
+    matchPhotos[matchPhotosKey] = photos.map(url => ({ url, caption: `${matchWhen(m)}${m.stadium ? ' · ' + m.stadium : ''}` }));
     const shots = photos.length
       ? `<div class="match-shots">${photos.map((url, i) => `<button class="ph" data-match-photos="${matchPhotosKey}" data-match-photo-idx="${i}" aria-label="Ver foto" style="background-image:url('${url}')"></button>`).join('')}</div>`
       : '';
+
+    const claros = m.claros || [], oscuros = m.oscuros || [];
+    const teams = (claros.length || oscuros.length)
+      ? `<div class="teams">${team(claros, 'claros', isGuest)}${team(oscuros, 'oscuros', isGuest)}</div>`
+      : `<div class="no-lineup">Formación sin cargar</div>`;
 
     wrap.appendChild(el(`
       <article class="match" data-rise>
         <div class="match-head">
           <div>
-            <div class="dt">${formatShort(m.date)}</div>
+            <div class="dt">${matchWhen(m)}</div>
             <div class="venue">📍 ${m.stadium || 'Sin sede'} ${m.stadium ? 'Stadium' : ''}</div>
           </div>
           <span class="result ${resultCls}">${resultText}</span>
         </div>
-        <div class="teams">${team(m.claros, 'claros', isGuest)}${team(m.oscuros, 'oscuros', isGuest)}</div>
+        ${teams}
         <div class="awards">${gol}${mvp}</div>
         ${shots}
       </article>`));
@@ -378,8 +412,7 @@ function renderExternalMatches(data){
       ? `<span class="rival">${m.opponent}</span>`
       : `<span class="rival pending">Rival sin cargar</span>`;
 
-    // dateLabel es para fechas imprecisas ("Julio 2026") donde no hay día exacto
-    const when = m.dateLabel || (m.date ? formatShort(m.date) : 'Fecha sin registrar');
+    const when = matchWhen(m);
     const where = m.stadium ? `📍 ${m.stadium}` : '';
 
     const lineup = Array.isArray(m.lineup) ? m.lineup : [];
@@ -449,20 +482,20 @@ function renderPlayerPanel(name, stats){
     return;
   }
   const points = s.wins * 3 + s.draws;
-  const max = s.played * 3;
+  const max = s.decided * 3;
   const pct = max ? Math.round((points / max) * 100) : 0;
   const streak = computeStreak(s.matches);
   const tiles = [
     { n: s.played, l: 'Partidos' },
     { n: `${s.wins}-${s.draws}-${s.losses}`, l: 'G · E · P' },
-    { n: `${pct}%`, l: `% puntos (${points}/${max})`, good: pct >= 50, bad: pct <= 30 && s.played >= 2 },
+    { n: max ? `${pct}%` : '—', l: max ? `% puntos (${points}/${max})` : '% puntos · sin resultados', good: max && pct >= 50, bad: max && pct <= 30 && s.decided >= 2 },
     { n: `${streak.emoji} ${streak.count}`, l: streak.label, good: streak.type === 'win', bad: streak.type === 'loss' },
     { n: s.mvps, l: s.mvps === 1 ? 'MVP' : 'MVPs', good: s.mvps > 0 },
     { n: s.goleadorCount, l: 'Goleador', good: s.goleadorCount > 0 }
   ];
-  const sortedMatches = [...s.matches].sort((a, b) => b.date.localeCompare(a.date));
+  const sortedMatches = [...s.matches].sort((a, b) => b.key.localeCompare(a.key));
   const teamLabel = t => t === 'claros' ? 'Claros' : 'Oscuros';
-  const resultLabel = o => o === 'win' ? 'Ganó' : o === 'loss' ? 'Perdió' : 'Empate';
+  const resultLabel = o => o === 'win' ? 'Ganó' : o === 'loss' ? 'Perdió' : o === 'draw' ? 'Empate' : 'Sin cargar';
   panel.innerHTML = `
     <div class="pp-head">${av(s.name, 'lg')}<div><div class="who">${s.name}${s.isGuest ? ' <span class="guest">invitado</span>' : ''}</div><div class="pj">${s.played} ${s.played === 1 ? 'partido jugado' : 'partidos jugados'}</div></div></div>
     <div class="tiles">
@@ -472,7 +505,7 @@ function renderPlayerPanel(name, stats){
       <div class="p2p-lbl">Partido a partido</div>
       ${sortedMatches.map(m => `
         <div class="p2p-row">
-          <span class="pdate">${formatShort(m.date)}</span>
+          <span class="pdate">${m.when}</span>
           <span class="pteam">${teamLabel(m.team)}${m.mvp ? ' · ★ MVP' : ''}${m.goleador ? ' · ⚽ Goleador' : ''}</span>
           <span class="pres ${m.outcome}">${resultLabel(m.outcome)}</span>
         </div>`).join('')}
