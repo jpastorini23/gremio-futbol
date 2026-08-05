@@ -56,8 +56,9 @@ async function loadData(){
 function computePlayerStats(data){
   const regulars = new Set(data.players);
   const allNames = new Set(data.players);
-  for (const m of data.matches){
-    [...m.claros, ...m.oscuros].forEach(p => allNames.add(p));
+  const externals = Array.isArray(data.externalMatches) ? data.externalMatches : [];
+  for (const m of [...data.matches, ...externals]){
+    [...(m.claros || []), ...(m.oscuros || []), ...(m.lineup || [])].forEach(p => allNames.add(p));
     if (m.mvp) allNames.add(m.mvp);
     if (m.goleador) allNames.add(m.goleador);
   }
@@ -93,6 +94,21 @@ function computePlayerStats(data){
 
     // Los premios se cuentan aparte de la formación: si un partido quedó
     // cargado sin equipos, la figura y el goleador igual valen.
+    if (m.mvp && stats[m.mvp]){
+      stats[m.mvp].mvps++;
+      if (key > stats[m.mvp].lastMvpDate) stats[m.mvp].lastMvpDate = key;
+    }
+    if (m.goleador && stats[m.goleador]){
+      stats[m.goleador].goleadorCount++;
+      if (key > stats[m.goleador].lastGoleadorDate) stats[m.goleador].lastGoleadorDate = key;
+    }
+  }
+
+  // Los partidos contra otros equipos aportan solo los premios: figura y
+  // goleador son logros de la persona. Los puntos siguen siendo de la liga
+  // interna, que es lo único que se juega Claros vs Oscuros.
+  for (const m of externals){
+    const key = matchKey(m);
     if (m.mvp && stats[m.mvp]){
       stats[m.mvp].mvps++;
       if (key > stats[m.mvp].lastMvpDate) stats[m.mvp].lastMvpDate = key;

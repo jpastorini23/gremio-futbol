@@ -82,20 +82,22 @@
     }
   ],
   "relaxLinks": [
-    {
-      "title": "Brazzers",
-      "url": "https://www.brazzers.com",
-      "note": "Sitio oficial",
-      "adult": true
-    }
+    { "title": "Brazzers", "url": "https://www.brazzers.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Pornhub", "url": "https://www.pornhub.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Reality Kings", "url": "https://www.realitykings.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Naughty America", "url": "https://www.naughtyamerica.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Bang Bros", "url": "https://bangbros.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Digital Playground", "url": "https://www.digitalplayground.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Vixen", "url": "https://www.vixen.com", "note": "Sitio oficial", "adult": true },
+    { "title": "Evil Angel", "url": "https://www.evilangel.com", "note": "Sitio oficial", "adult": true }
   ],
   "externalMatches": [
     {
       "id": "ext-1",
       "date": "",
       "dateLabel": "Julio 2026",
-      "opponent": "",
-      "result": "",
+      "opponent": "Solís",
+      "result": "win",
       "score": "",
       "lineup": ["Juancho", "Rama", "Gasti", "Luki", "Juli", "Mickey"],
       "goleador": "Mickey",
@@ -113,8 +115,8 @@
       "sortKey": "2026-07-b",
       "claros": ["Gasti", "Juani", "Mickey", "Luki", "Mati"],
       "oscuros": ["Minu", "Tincho", "Juli", "Rama", "Luciano"],
-      "winner": "",
-      "goleador": "Juani",
+      "winner": "oscuros",
+      "goleador": "Minu",
       "mvp": "Luciano",
       "stadium": "Araoz",
       "photos": [],
