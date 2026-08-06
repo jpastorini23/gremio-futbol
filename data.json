@@ -137,6 +137,20 @@
       "notes": ""
     },
     {
+      "id": "junio-bruno",
+      "date": "",
+      "dateLabel": "Junio 2026",
+      "sortKey": "2026-06-a",
+      "claros": ["Bruno", "Juancho", "Rama", "Juli", "Gasti"],
+      "oscuros": ["Minu", "Luki", "Mickey", "Juani", "Tincho"],
+      "winner": "oscuros",
+      "goleador": "",
+      "mvp": "Juani",
+      "stadium": "",
+      "photos": [],
+      "notes": ""
+    },
+    {
       "date": "2026-06-04",
       "claros": ["Gasti", "Rama", "Mati", "Juli", "Luki"],
       "oscuros": ["Tincho", "Fede", "Minu", "Mickey", "Sean"],
