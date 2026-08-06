@@ -93,6 +93,20 @@
   ],
   "externalMatches": [
     {
+      "id": "ext-2",
+      "date": "2026-08-04",
+      "opponent": "El grado de mi hermano",
+      "result": "draw",
+      "score": "",
+      "lineup": ["Juancho", "Rama", "Minu", "Mickey", "Juani"],
+      "opponentLineup": ["Healy", "Tomi F", "Juan Grandi", "Manolo", "Tomi Albertolli"],
+      "goleador": "Mickey",
+      "mvp": "Rama",
+      "stadium": "",
+      "photos": [],
+      "notes": ""
+    },
+    {
       "id": "ext-1",
       "date": "",
       "dateLabel": "Julio 2026",
@@ -131,7 +145,7 @@
       "oscuros": ["Juancho", "Minu", "Juli", "Rama", "Healy"],
       "winner": "oscuros",
       "goleador": "Luki",
-      "mvp": "Juancho",
+      "mvp": "Luki",
       "stadium": "Araoz",
       "photos": [],
       "notes": ""

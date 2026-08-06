@@ -432,7 +432,7 @@ function renderExternalMatches(data){
   }
 
   const regulars = new Set(data.players);
-  const sorted = [...list].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const sorted = [...list].sort(byDateDesc);
 
   sorted.forEach((m, i) => {
     const resultMap = {
@@ -456,6 +456,14 @@ function renderExternalMatches(data){
     const players = lineup.length
       ? lineup.map(p => `<div class="player">${av(p, 'xs')}<span>${p}</span>${regulars.has(p) ? '' : '<span class="guest-tag">inv</span>'}</div>`).join('')
       : `<div class="ext-nolineup">Formación sin cargar</div>`;
+
+    // El rival va solo con los nombres: no entra al plantel ni suma stats.
+    const rivalLineup = Array.isArray(m.opponentLineup) ? m.opponentLineup : [];
+    const rivalBlock = rivalLineup.length ? `
+      <div class="ext-lineup rival-lineup">
+        <div class="tlbl"><span class="dot"></span>${m.opponent || 'Rival'}</div>
+        ${rivalLineup.map(p => `<div class="player name-only"><span>${p}</span></div>`).join('')}
+      </div>` : '';
 
     const gol = m.goleador
       ? `<div class="award gol">${av(m.goleador, 'sm')}<div><div class="k">Goleador</div><div class="v">${m.goleador}</div></div></div>`
@@ -481,9 +489,12 @@ function renderExternalMatches(data){
           </div>
           ${resultPill}
         </div>
-        <div class="ext-lineup">
-          <div class="tlbl"><span class="dot"></span>Nuestra formación</div>
-          ${players}
+        <div class="ext-teams">
+          <div class="ext-lineup">
+            <div class="tlbl"><span class="dot"></span>Nuestra formación</div>
+            ${players}
+          </div>
+          ${rivalBlock}
         </div>
         ${awards}
         ${shots}

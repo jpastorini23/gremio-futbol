@@ -361,6 +361,13 @@ body::before{
 .acc-body .selectwrap select{ width:100%; }
 .acc-body .player-panel{ background:transparent; border:0; padding:0; }
 
+/* rival de un partido externo: solo nombres, sin avatar ni stats */
+.ext-teams{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.rival-lineup .player.name-only{ justify-content:flex-start; color:var(--text-dim); }
+.rival-lineup .tlbl{ color:var(--text-dim); }
+.rival-lineup .tlbl .dot{ background:var(--text-mute); }
+@media (max-width:560px){ .ext-teams{ grid-template-columns:1fr; } }
+
 /* ============================================================
    LINKS (TERCER TIEMPO)
    ============================================================ */
