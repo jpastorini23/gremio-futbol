@@ -156,6 +156,23 @@ body::before{
 .spot-rows .prow:last-child{ border-bottom:0; padding-bottom:0; }
 .spot-empty{ color:var(--text-mute); font-size:13px; font-style:italic; }
 
+/* "ver todos": el top 3 queda a la vista y el resto se despliega */
+.spot-more{ position:relative; z-index:1; margin-top:2px; }
+.spot-more > summary{
+  display:flex; align-items:center; gap:7px; cursor:pointer; list-style:none; user-select:none;
+  padding:9px 0 2px; border-top:1px solid var(--border);
+  font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--text-dim);
+  transition:color .15s var(--ease);
+}
+.spot-more > summary::-webkit-details-marker{ display:none; }
+.spot-more > summary:hover{ color:var(--text); }
+.spot-more > summary:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
+.spot-more > summary .acc-chev{ width:7px; height:7px; border-width:1.5px; margin-left:0; }
+.spot-more[open] > summary .acc-chev{ border-color:var(--accent); }
+.spot-more[open] > summary{ color:var(--text); }
+.spot-more .spot-rows{ margin-top:2px; }
+.spot-more .spot-rows .prow:first-of-type{ border-top:1px solid var(--border); }
+
 .footnote{
   display:flex; align-items:center; gap:8px; justify-content:center; flex-wrap:wrap;
   margin-top:16px; color:var(--text-dim); font-size:13px;

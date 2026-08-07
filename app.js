@@ -177,21 +177,34 @@ function renderStatstrip(data){
 function renderSpotlights(stats){
   const arr = Object.values(stats);
 
-  const top3 = (countField, lastField) => arr
+  // lista completa: la tarjeta muestra el top 3 y guarda el resto en el "ver todos"
+  const ranking = (countField, lastField) => arr
     .filter(s => s[countField] > 0)
     .sort((a, b) => b[countField] - a[countField] || b[lastField].localeCompare(a[lastField]))
-    .slice(0, 3)
     .map(s => ({ name: s.name, value: s[countField], isGuest: s.isGuest }));
 
   const card = (elId, role, rows, emptyMsg) => {
+    if (!rows.length){
+      document.getElementById(elId).innerHTML =
+        `<div class="role">${role}</div><div class="spot-empty">${emptyMsg}</div>`;
+      return;
+    }
+    const rest = rows.slice(3);
+    const more = rest.length ? `
+      <details class="spot-more">
+        <summary>
+          <span class="more-txt">Ver los ${rows.length}</span>
+          <span class="acc-chev" aria-hidden="true"></span>
+        </summary>
+        <div class="spot-rows">${podiumRows(rest, 'n', 3)}</div>
+      </details>` : '';
     document.getElementById(elId).innerHTML =
       `<div class="role">${role}</div>` +
-      (rows.length ? `<div class="spot-rows">${podiumRows(rows, 'n')}</div>`
-                   : `<div class="spot-empty">${emptyMsg}</div>`);
+      `<div class="spot-rows">${podiumRows(rows.slice(0, 3), 'n')}</div>` + more;
   };
 
-  card('spot-fig', '★ Top 3 figuras', top3('mvps', 'lastMvpDate'), 'Todavía sin figuras');
-  card('spot-gol', '⚽ Top 3 goleadores', top3('goleadorCount', 'lastGoleadorDate'), 'Todavía sin goleadores');
+  card('spot-fig', '★ Top 3 figuras', ranking('mvps', 'lastMvpDate'), 'Todavía sin figuras');
+  card('spot-gol', '⚽ Top 3 goleadores', ranking('goleadorCount', 'lastGoleadorDate'), 'Todavía sin goleadores');
 }
 
 function renderHeroNote(){
@@ -285,10 +298,13 @@ function renderGallery(data){
   });
 }
 
-function podiumRows(list, kind){
+// offset sirve para seguir una numeración ya empezada (el "ver todos"
+// del top 3 arranca en 4, no en 1).
+function podiumRows(list, kind, offset = 0){
   if (!list.length) return '';
   const medals = ['g', 's', 'b'];
-  return list.map((r, i) => {
+  return list.map((r, idx) => {
+    const i = idx + offset;
     const rk = i < 3 ? medals[i] : 'n';
     const val = kind === 'pts'
       ? `<div class="pval ppct">${r.value}%<span class="pj">${r.pj} PJ</span></div>`
